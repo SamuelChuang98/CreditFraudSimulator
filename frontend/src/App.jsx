@@ -1023,7 +1023,7 @@ export default function ATMFraudSimulator() {
               <div style={{fontFamily:"'DM Serif Display',serif",fontSize:30,color:T.text,lineHeight:1.1}}>
                 Fraud Detection Simulator
               </div>
-              <div style={{fontSize:13,color:T.muted,marginTop:4}}>Canadian ATM Transaction Analysis</div>
+              <div style={{fontSize:13,color:T.muted,marginTop:4}}>Canadian Transaction Analysis</div>
               <div style={{marginTop:8,display:"flex",alignItems:"center",gap:6}}>
                 <span style={{
                   width:7,height:7,borderRadius:"50%",display:"inline-block",flexShrink:0,
