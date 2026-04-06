@@ -426,9 +426,12 @@ def get_top_features(model, df_row: pd.DataFrame, top_n: int = 5) -> list:
 
         def clean_name(name):
             name = str(name)
+            is_numeric = name.startswith("num__")
             for prefix in ["num__", "cat__", "remainder__"]:
                 if name.startswith(prefix):
                     name = name[len(prefix):]
+            if is_numeric:
+                return name
             parts = name.split("_", 1)
             if len(parts) == 2 and not parts[0].isdigit():
                 return f"{parts[0]}: {parts[1]}"

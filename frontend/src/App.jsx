@@ -629,12 +629,12 @@ export default function ATMFraudSimulator() {
   const [rq1Drawer,       setRq1Drawer]       = useState(null); // selected RQ1 transaction
   const [rq1Features,     setRq1Features]     = useState({}); // {index: {lrFeatures, dtFeatures}}
   const [rqTab,           setRqTab]           = useState("rq1"); // RQ sub-tab
-  const lrSmoteRef        = useRef(true);        // uncontrolled — no state update on toggle
-  const dtSmoteRef        = useRef(true);
+  const lrSmoteRef        = useRef(false);       // uncontrolled — no state update on toggle
+  const dtSmoteRef        = useRef(false);
   const lrSmoteBtnRef     = useRef(null);        // container for LR SMOTE buttons
   const dtSmoteBtnRef     = useRef(null);
-  const [lrSmoteApplied,  setLrSmoteApplied]  = useState(true);  // committed on Refresh
-  const [dtSmoteApplied,  setDtSmoteApplied]  = useState(true);
+  const [lrSmoteApplied,  setLrSmoteApplied]  = useState(false); // committed on Refresh
+  const [dtSmoteApplied,  setDtSmoteApplied]  = useState(false);
   const [lrThreshApplied, setLrThreshApplied] = useState(0.5);   // committed on Refresh
   const [dtThreshApplied, setDtThreshApplied] = useState(0.5);
   const [txnFilter,  setTxnFilter]  = useState("all");  // "all"|"fraud"|"legit"
@@ -686,12 +686,6 @@ export default function ATMFraudSimulator() {
             setModelThresholds({ logistic_regression: lrT, decision_tree: dtT });
             if (!initialThresholdSet.current) {
               initialThresholdSet.current = true;
-              lrThreshRef.current = lrT;
-              dtThreshRef.current = dtT;
-              setLrSliderKey(k => k + 1);
-              setDtSliderKey(k => k + 1);
-              setLrThreshApplied(lrT);
-              setDtThreshApplied(dtT);
               setRq1LrThreshold(lrT);
               setRq1DtThreshold(dtT);
             }
@@ -1460,8 +1454,8 @@ export default function ATMFraudSimulator() {
                         }} style={{
                           padding:"2px 8px",fontSize:9,fontWeight:700,cursor:"pointer",border:"none",
                           fontFamily:"'DM Sans',sans-serif",letterSpacing:"0.05em",textTransform:"uppercase",
-                          background: v===true ? accent : "transparent",
-                          color: v===true ? "#0a0c10" : accent,
+                          background: v===smoteRef.current ? accent : "transparent",
+                          color: v===smoteRef.current ? "#0a0c10" : accent,
                           transition:"background 0.15s",
                         }}>{v?"SMOTE":"No SMOTE"}</button>
                       ))}
