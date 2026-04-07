@@ -2475,13 +2475,15 @@ export default function ATMFraudSimulator() {
                           // No-SMOTE rows: hardcoded from Python analysis script output (backend only holds SMOTE-trained scores)
                           const lrNoSmote   = {precision:0.3333, recall:0.1000, f1:0.1538, tp:1, fn:9};
                           const lrNoSmote81 = {precision:1.0000, recall:0.1000, f1:0.1818, tp:1, fn:9};
-                          const dtNoSmote   = {precision:0.3333, recall:0.6000, f1:0.4286, tp:6, fn:4};
+                          const dtNoSmote20 = {precision:0.3333, recall:0.6000, f1:0.4286, tp:6, fn:4};
+                          const dtNoSmote50 = {precision:0.4444, recall:0.4000, f1:0.4211, tp:4, fn:6};
                           const tableRows = [
                             {model:"LR — No SMOTE (t=0.50)",               m:lrNoSmote,   accent:THEMES.logistic_regression.accent, hi:false, tag:null},
-                            {model:"LR — No SMOTE (t=0.81)",               m:lrNoSmote81, accent:THEMES.logistic_regression.accent, hi:false, tag:"high precision"},
+                            {model:"LR — No SMOTE (t=0.81)",               m:lrNoSmote81, accent:THEMES.logistic_regression.accent, hi:false, tag:null},
                             {model:"LR — SMOTE, Default (t=0.50)",          m:lrM50,       accent:THEMES.logistic_regression.accent, hi:false, tag:null},
                             {model:`LR — SMOTE + Optimal (t=${lrOptT?.toFixed(2)})`, m:lrOpt, accent:THEMES.logistic_regression.accent, hi:true, tag:"best recall"},
-                            {model:"DT — No SMOTE (t=0.20)",               m:dtNoSmote,   accent:THEMES.decision_tree.accent,       hi:true,  tag:"recommended ★"},
+                            {model:"DT — No SMOTE (t=0.20)",               m:dtNoSmote20, accent:THEMES.decision_tree.accent,       hi:true,  tag:"best F1 score"},
+                            {model:"DT — No SMOTE (t=0.50)",               m:dtNoSmote50, accent:THEMES.decision_tree.accent,       hi:false, tag:null},
                             {model:"DT — SMOTE, Default (t=0.50)",          m:dtM50,       accent:THEMES.decision_tree.accent,       hi:false, tag:null},
                             {model:`DT — SMOTE + Optimal (t=${dtOptT?.toFixed(2)})`, m:dtOpt, accent:THEMES.decision_tree.accent, hi:false, tag:null},
                           ];
@@ -2525,8 +2527,8 @@ export default function ATMFraudSimulator() {
                         const dtBase = hasData ? computeMetrics(ts?.dt_scores||analysisResults.dtScores, ts?.dt_labels||analysisResults.labels, 0.5) : {};
                         const lrRecallGain = lrOpt.recall !== undefined ? ((lrOpt.recall - 0.10)*100).toFixed(1) : null;
                         const dtF1Shift    = dtOpt.f1 !== undefined && dtBase.f1 !== undefined ? ((dtOpt.f1 - dtBase.f1)*100).toFixed(1) : null;
-                        const lrNoSmote = {precision:0.3333, recall:0.1000, f1:0.1538, tp:1, fn:9};
-                        const dtNoSmote = {precision:0.3333, recall:0.6000, f1:0.4286, tp:6, fn:4};
+                        const lrNoSmote  = {precision:0.3333, recall:0.1000, f1:0.1538, tp:1, fn:9};
+                        const dtNoSmote  = {precision:0.3333, recall:0.6000, f1:0.4286, tp:6, fn:4};
                         return (
                           <div style={{background:AP.surface,border:`1px solid ${AP.border}`,borderRadius:14,padding:"20px 22px"}}>
                             <div style={{fontSize:13,fontWeight:600,color:AP.text,marginBottom:10}}>Interpretation</div>
