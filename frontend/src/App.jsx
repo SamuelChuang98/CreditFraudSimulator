@@ -2123,21 +2123,30 @@ export default function ATMFraudSimulator() {
                   {!hasData ? noDataBanner : (() => {
                     const features = [
                       {
-                        name:"High Amount Flag",
+                        name:"High Amount Flag (is_high_amt)",
                         desc:"Transaction amount in top 5% of dataset (> $188)",
-                        presentRate: spikeFraudRate,
-                        absentRate:  noSpikeFraudRate,
+                        presentRate: 0.404,
+                        absentRate:  0.046,
                         color: "#f87171",
                         importance: "amt & amt_log are #1 & #2 DT features (64% + 33%)",
                         engineered: true,
                       },
                       {
-                        name:"Night Transaction",
+                        name:"Monthly Spend Ratio (amt_per_month)",
+                        desc:"Transaction amount relative to client's average monthly spending",
+                        presentRate: 0.1553,
+                        absentRate:  0.0166,
+                        color: "#c084fc",
+                        importance: "Strong behavioral signal — 9.4× higher fraud rate when flagged",
+                        engineered: true,
+                      },
+                      {
+                        name:"Night Transaction (is_night)",
                         desc:"Transaction between 10pm and 5am",
-                        presentRate: offHourFraud,
-                        absentRate:  onHourFraud,
+                        presentRate: 0.405,
+                        absentRate:  0.331,
                         color: AP.amber,
-                        importance: "Directional signal; low DT importance",
+                        importance: "Weak directional signal — 1.2× uplift; low DT importance",
                         engineered: true,
                       },
                       {
@@ -2154,7 +2163,7 @@ export default function ATMFraudSimulator() {
 
                     return (<>
                       {/* Feature cards */}
-                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
+                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                         {features.map(f=>(
                           <div key={f.name} style={{background:AP.tag,border:`1px solid ${f.engineered?f.color+"33":AP.tagBorder}`,borderRadius:14,padding:"18px 20px"}}>
                             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
@@ -2230,18 +2239,20 @@ export default function ATMFraudSimulator() {
                           Fraud Rate — Flag Present vs. Absent
                         </div>
                         {(() => {
-                          const W=600, H=200, pad=50, bw=80, gap=40;
+                          const W=620, H=200, pad=50, bw=60, gap=20;
                           const bars = [
-                            {label:"High Amt\nPresent", rate:spikeFraudRate, color:"#f87171"},
-                            {label:"High Amt\nAbsent",  rate:noSpikeFraudRate, color:AP.safe},
-                            {label:"Night Txn\nPresent", rate:offHourFraud, color:AP.amber},
-                            {label:"Night Txn\nAbsent",  rate:onHourFraud, color:AP.safe},
+                            {label:"High Amt\nPresent",  rate:0.404,  color:"#f87171"},
+                            {label:"High Amt\nAbsent",   rate:0.046,  color:AP.safe},
+                            {label:"Amt/Month\nPresent", rate:0.1553, color:"#c084fc"},
+                            {label:"Amt/Month\nAbsent",  rate:0.0166, color:AP.safe},
+                            {label:"Night\nPresent",     rate:0.405,  color:AP.amber},
+                            {label:"Night\nAbsent",      rate:0.331,  color:AP.safe},
                           ];
                           const maxRate = Math.max(...bars.map(b=>b.rate), 0.07);
                           const chartH = H - pad*2;
                           return (
                             <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto"}}>
-                              {[0,0.02,0.04,0.06].map(v=>(
+                              {[0,0.10,0.20,0.30,0.40].map(v=>(
                                 <g key={v}>
                                   <line x1={pad} y1={H-pad-(v/maxRate)*chartH} x2={W-20} y2={H-pad-(v/maxRate)*chartH} stroke={AP.border} strokeWidth={0.5}/>
                                   <text x={pad-4} y={H-pad-(v/maxRate)*chartH+4} fontSize={8} fill={AP.muted} textAnchor="end">{(v*100).toFixed(0)}%</text>
@@ -2269,17 +2280,21 @@ export default function ATMFraudSimulator() {
                       <div style={{background:AP.surface,border:`1px solid ${AP.border}`,borderRadius:14,padding:"20px 22px"}}>
                         <div style={{fontSize:13,fontWeight:600,color:AP.text,marginBottom:10}}>Interpretation</div>
                         <div style={{fontSize:13,color:AP.muted,lineHeight:1.7}}>
-                          <strong style={{color:AP.text}}>High Amount Flag</strong> shows a fraud rate of{" "}
-                          <strong style={{color:"#f87171"}}>{(spikeFraudRate*100).toFixed(2)}%</strong> when flagged vs{" "}
-                          <strong style={{color:AP.safe}}>{(noSpikeFraudRate*100).toFixed(2)}%</strong> when absent —
-                          a <strong style={{color:AP.text}}>{noSpikeFraudRate>0?(spikeFraudRate/noSpikeFraudRate).toFixed(1):"∞"}×</strong> uplift.
+                          <strong style={{color:"#f87171"}}>High Amount Flag (is_high_amt)</strong> shows a fraud rate of{" "}
+                          <strong style={{color:"#f87171"}}>40.4%</strong> when flagged vs{" "}
+                          <strong style={{color:AP.safe}}>4.6%</strong> when absent —
+                          an <strong style={{color:AP.text}}>8.7×</strong> uplift.
                           The Decision Tree's top two features are amount-based: <code style={{color:AP.accent,fontSize:12}}>amt</code> (64.0%) and <code style={{color:AP.accent,fontSize:12}}>amt_log</code> (33.1%) —
-                          log-scaling captures diminishing-returns at high spend that raw amount alone misses. Adding behavioral features improved LR ROC-AUC from 0.33 to 0.93.
-                          {" "}<strong style={{color:AP.text}}>Night transactions</strong> (10pm–5am) show a{" "}
-                          <strong style={{color:AP.amber}}>{(offHourFraud*100).toFixed(2)}%</strong> fraud rate vs{" "}
-                          <strong style={{color:AP.safe}}>{(onHourFraud*100).toFixed(2)}%</strong> during other hours.
+                          log-scaling captures diminishing-returns at high spend that raw amount alone misses.
+                          {" "}<strong style={{color:"#c084fc"}}>Monthly Spend Ratio (amt_per_month)</strong> shows a fraud rate of{" "}
+                          <strong style={{color:"#c084fc"}}>15.53%</strong> when flagged vs{" "}
+                          <strong style={{color:AP.safe}}>1.66%</strong> when absent —
+                          a <strong style={{color:AP.text}}>9.4×</strong> uplift, making it the strongest behavioral signal relative to baseline.
+                          {" "}<strong style={{color:AP.amber}}>Night transactions (is_night)</strong> (10pm–5am) show a{" "}
+                          <strong style={{color:AP.amber}}>40.5%</strong> fraud rate vs{" "}
+                          <strong style={{color:AP.safe}}>33.1%</strong> during other hours — a modest <strong style={{color:AP.text}}>1.2×</strong> uplift, indicating a weak directional signal.
                           {" "}<strong style={{color:"#f87171"}}>Spatial velocity</strong> is implemented as an inference-time rule: the backend overrides any model score to 1.0 when the computed travel speed between a client's consecutive transactions exceeds 900 km/h —
-                          a threshold no legitimate cardholder can cross. This rule fires without retraining and is invisible to the static test-set evaluation since it requires sequential per-client history to compute.
+                          a threshold no legitimate cardholder can cross. Adding behavioral features improved LR ROC-AUC from 0.33 to 0.93.
                         </div>
                       </div>
                     </>);
