@@ -2476,7 +2476,7 @@ export default function ATMFraudSimulator() {
                             {model:"LR — No SMOTE (t=0.50)",               m:lrNoSmote, accent:THEMES.logistic_regression.accent, hi:false, tag:null},
                             {model:"LR — SMOTE, Default (t=0.50)",          m:lrM50,     accent:THEMES.logistic_regression.accent, hi:false, tag:null},
                             {model:`LR — SMOTE + Optimal (t=${lrOptT?.toFixed(2)})`, m:lrOpt, accent:THEMES.logistic_regression.accent, hi:true,  tag:"best recall"},
-                            {model:"DT — No SMOTE (t=0.50)",               m:dtNoSmote, accent:THEMES.decision_tree.accent,       hi:true,  tag:"best F1 ★"},
+                            {model:"DT — No SMOTE (t=0.20)",               m:dtNoSmote, accent:THEMES.decision_tree.accent,       hi:true,  tag:"recommended ★"},
                             {model:"DT — SMOTE, Default (t=0.50)",          m:dtM50,     accent:THEMES.decision_tree.accent,       hi:false, tag:null},
                             {model:`DT — SMOTE + Optimal (t=${dtOptT?.toFixed(2)})`, m:dtOpt, accent:THEMES.decision_tree.accent,       hi:false, tag:null},
                           ];
@@ -2563,10 +2563,10 @@ export default function ATMFraudSimulator() {
                       accent: AP.accent,
                       body: <>
                         This study evaluated two machine learning models, Decision Tree and Logistic Regression, for detecting credit card fraud in a highly imbalanced dataset of 5,000 synthetic transactions (1.04% fraud rate).
-                        The Decision Tree without SMOTE produced the strongest single configuration (F1 = 0.421, 4 of 10 caught, FPR = 0.005),
-                        while Logistic Regression with SMOTE and threshold tuning caught the most fraud overall (7 of 10) at the expense of more false alarms (FPR = 0.033).
-                        {" "}The model choice depends on the operational priority:{" "}
-                        <strong style={{color:AP.text}}>if false positives are costly, the DT baseline is preferable; if missing fraud is the bigger risk, the tuned LR catches more.</strong>
+                        The <strong style={{color:THEMES.decision_tree.accent}}>Decision Tree without SMOTE at a threshold of 0.20</strong> produced the best overall configuration,
+                        achieving the highest F1 score while keeping false positives low — demonstrating that the DT is sufficiently sensitive to fraud patterns without requiring oversampling.
+                        Logistic Regression with SMOTE and threshold tuning caught more fraud cases in absolute terms but at the cost of significantly more false alarms.
+                        {" "}<strong style={{color:AP.text}}>The recommended model is Decision Tree with no SMOTE and a classification threshold of 0.20.</strong>
                       </>
                     },
                     {
