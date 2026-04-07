@@ -470,7 +470,7 @@ function DetailDrawer({ entry, onClose, T, backendUrl, threshold=0.5 }) {
       onClick={onClose}>
       <div style={{position:"absolute",inset:0,background:"rgba(0,0,0,0.6)",backdropFilter:"blur(4px)"}}/>
       <div style={{
-        position:"relative",width:430,height:"100vh",
+        position:"relative",width:windowWidth<=768?"100vw":430,height:"100vh",
         background:T.surface,borderLeft:`1px solid ${T.borderHi}`,
         boxShadow:`-12px 0 50px rgba(0,0,0,0.5)`,
         overflowY:"auto",padding:32,zIndex:1,
@@ -596,7 +596,18 @@ function getLogPrevTxn(clientId, logEntries) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
+function useWindowWidth() {
+  const [width, setWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    const handler = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return width;
+}
+
 export default function ATMFraudSimulator() {
+  const windowWidth = useWindowWidth();
   const [model,      setModel]      = useState("logistic_regression");
   const [txn,        setTxn]        = useState(makeTransaction());
   const [result,     setResult]     = useState(null);
