@@ -5,6 +5,61 @@
     <link rel="icon" type="image/png" href="/fraud_favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Credit Fraud Simulator</title>
+    <style>
+      @media (max-width: 768px) {
+        /* Main wrapper padding */
+        .main-wrapper {
+          padding: 16px 12px 48px !important;
+        }
+
+        /* Tab bar — smaller font, allow wrap */
+        .tab-bar {
+          flex-wrap: wrap;
+          gap: 4px;
+        }
+        .tab-bar button {
+          padding: 8px 14px !important;
+          font-size: 11px !important;
+        }
+
+        /* Main simulator 2-col → 1-col */
+        .sim-main-grid {
+          grid-template-columns: 1fr !important;
+        }
+
+        /* Stats cards 3-col → 2-col */
+        .stats-grid {
+          grid-template-columns: 1fr 1fr !important;
+        }
+
+        /* 4-col metrics → 2-col */
+        .metrics-grid {
+          grid-template-columns: 1fr 1fr !important;
+        }
+
+        /* RQ2 feature cards 2-col → 1-col */
+        .rq2-feature-grid {
+          grid-template-columns: 1fr !important;
+        }
+
+        /* Scrollable tables */
+        .table-scroll {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        /* Scrollable charts */
+        .chart-scroll {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        /* Transaction log container — reduce padding on mobile */
+        .txn-log-container {
+          padding: 16px !important;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
