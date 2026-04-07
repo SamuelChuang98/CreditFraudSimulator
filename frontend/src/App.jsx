@@ -1301,7 +1301,7 @@ export default function ATMFraudSimulator() {
         </div>
 
         {/* ── Transaction Log ── */}
-        <div style={{
+        <div className="txn-log-container" style={{
           maxWidth:1060,margin:"20px auto 0",
           background:T.surface,borderRadius:16,
           border:`1px solid ${T.border}`,padding:28,
@@ -1334,6 +1334,7 @@ export default function ATMFraudSimulator() {
 
           {log.length>0 ? (
             <>
+              <div className="table-scroll"><div style={{minWidth:700}}>
               <div style={{
                 display:"grid",gridTemplateColumns:"1.2fr 1.5fr 0.9fr 0.9fr 0.8fr 90px 36px 28px",
                 padding:"8px 14px",background:T.tag,borderRadius:8,marginBottom:6,
@@ -1398,6 +1399,7 @@ export default function ATMFraudSimulator() {
                   );
                 })}
               </div>
+              </div></div>
             </>
           ) : (
             <div style={{padding:"40px 0",textAlign:"center",color:T.muted,fontSize:14}}>
@@ -1675,6 +1677,10 @@ export default function ATMFraudSimulator() {
 
                     return (
                       <>
+                        <div style={{fontSize:11,color:AP.muted,marginBottom:8}}>
+                          {filtered.length} of {analysisResults.txns.length} transactions
+                        </div>
+                        <div className="table-scroll"><div style={{minWidth:650}}>
                         <div style={{display:"grid",gridTemplateColumns:"0.5fr 1.2fr 0.8fr 0.6fr 80px 80px 70px",padding:"8px 14px",
                           background:AP.tag,borderRadius:8,marginBottom:6,border:`1px solid ${AP.tagBorder}`,alignItems:"center"}}>
                           <span style={{fontSize:11,fontWeight:600,color:AP.muted,letterSpacing:"0.06em",textTransform:"uppercase"}}>#</span>
@@ -1684,9 +1690,6 @@ export default function ATMFraudSimulator() {
                           <SortBtn col="lr" label="LR Score"/>
                           <SortBtn col="dt" label="DT Score"/>
                           <span style={{fontSize:11,fontWeight:600,color:AP.muted,letterSpacing:"0.06em",textTransform:"uppercase"}}>Agree?</span>
-                        </div>
-                        <div style={{fontSize:11,color:AP.muted,marginBottom:8}}>
-                          {filtered.length} of {analysisResults.txns.length} transactions
                         </div>
                         <div style={{maxHeight:360,overflowY:"auto"}}>
                         {filtered.map((t)=>{
@@ -1866,6 +1869,7 @@ export default function ATMFraudSimulator() {
                       );
                         })}
                         </div>
+                        </div></div>
                       </>
                     );
                   })()}
@@ -2262,7 +2266,7 @@ export default function ATMFraudSimulator() {
                           const maxRate = Math.max(...bars.map(b=>b.rate), 0.07);
                           const chartH = H - pad*2;
                           return (
-                            <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto"}}>
+                            <div className="chart-scroll"><svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",height:"auto"}}>
                               {[0,0.10,0.20,0.30,0.40].map(v=>(
                                 <g key={v}>
                                   <line x1={pad} y1={H-pad-(v/maxRate)*chartH} x2={W-20} y2={H-pad-(v/maxRate)*chartH} stroke={AP.border} strokeWidth={0.5}/>
@@ -2282,7 +2286,7 @@ export default function ATMFraudSimulator() {
                                   </g>
                                 );
                               })}
-                            </svg>
+                            </svg></div>
                           );
                         })()}
                       </div>
@@ -2480,7 +2484,7 @@ export default function ATMFraudSimulator() {
                         <div style={{fontSize:11,fontWeight:600,color:AP.muted,letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:14}}>
                           F1 &amp; Recall Across Thresholds — Both Models
                         </div>
-                        <ThresholdChart/>
+                        <div className="chart-scroll"><ThresholdChart/></div>
                         <div style={{fontSize:11,color:AP.muted,marginTop:8}}>
                           Solid lines = F1-Score (SMOTE). Dashed lines = Recall (SMOTE). Faint dotted horizontals = No-SMOTE F1 baseline. Hover dots for details.
                         </div>
@@ -2514,7 +2518,7 @@ export default function ATMFraudSimulator() {
                             {model:`DT — SMOTE + Optimal (t=${dtOptT?.toFixed(2)})`, m:dtOpt, accent:THEMES.decision_tree.accent, hi:false, tag:null},
                           ];
                           return (
-                            <div>
+                            <div className="table-scroll"><div style={{minWidth:500}}>
                               <div style={{display:"grid",gridTemplateColumns:"2.4fr 1fr 1fr 1fr 1fr",padding:"7px 12px",
                                 background:AP.surfaceHi,borderRadius:"8px 8px 0 0",border:`1px solid ${AP.border}`}}>
                                 {["Model / Configuration","Precision","Recall","F1-Score","Fraud Caught"].map(h=>(
@@ -2536,7 +2540,7 @@ export default function ATMFraudSimulator() {
                                   <span style={{fontSize:12,fontWeight:hi?700:400,color:hi?accent:AP.text}}>{m.tp} / {m.tp+m.fn}</span>
                                 </div>
                               ))}
-                            </div>
+                            </div></div>
                           );
                         })()}
                       </div>
