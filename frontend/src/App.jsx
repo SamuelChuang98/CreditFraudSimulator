@@ -668,7 +668,7 @@ export default function ATMFraudSimulator() {
   const analysisStopRef = useRef(false);
   const simRef = useRef(null);
 
-  const backendUrl = "http://localhost:8000";
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
   const useBackend = true;
 
   // Poll backend health every 5s
