@@ -2317,8 +2317,8 @@ export default function ATMFraudSimulator() {
                     const _lrOpt = lrSweep[_lrBestIdx] || {};
                     const _dtOpt = dtSweep[_dtBestIdx] || {};
                     const smoteRows = [
-                      {model:"Logistic Regression",  noSmoteRecall:0.10, noSmoteF1:0.1538, noSmoteT:0.50, smoteRecall:_lrOpt.recall??0.60, smoteF1:_lrOpt.f1??0.2449, accent:THEMES.logistic_regression.accent},
-                      {model:"Decision Tree",        noSmoteRecall:0.60, noSmoteF1:0.4290, noSmoteT:0.20, smoteRecall:_dtOpt.recall??0.40, smoteF1:_dtOpt.f1??0.2759, accent:THEMES.decision_tree.accent},
+                      {model:"Logistic Regression",  noSmoteRecall:0.10, noSmoteF1:0.1538, noSmoteT:0.50, smoteRecall:_lrOpt.recall??0.60, smoteF1:_lrOpt.f1??0.2449, accent:THEMES.logistic_regression.accent, noSmoteColor:AP.fraud, smoteColor:THEMES.logistic_regression.accent},
+                      {model:"Decision Tree",        noSmoteRecall:0.60, noSmoteF1:0.4290, noSmoteT:0.20, smoteRecall:_dtOpt.recall??0.40, smoteF1:_dtOpt.f1??0.2759, accent:THEMES.decision_tree.accent,       noSmoteColor:AP.safe,  smoteColor:AP.fraud},
                     ];
 
                     // F1 line chart across thresholds
@@ -2443,10 +2443,10 @@ export default function ATMFraudSimulator() {
                             </div>
                             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                               {[
-                                {label:`No SMOTE (t=${s.noSmoteT.toFixed(2)}) — Recall`, val:s.noSmoteRecall, color:AP.fraud},
-                                {label:`No SMOTE (t=${s.noSmoteT.toFixed(2)}) — F1`,     val:s.noSmoteF1,    color:AP.fraud},
-                                {label:`SMOTE + Opt. (t=${sweepThresholds[s.model==="Logistic Regression"?_lrBestIdx:_dtBestIdx]?.toFixed(2)}) — Recall`, val:s.smoteRecall, color:s.accent},
-                                {label:`SMOTE + Opt. (t=${sweepThresholds[s.model==="Logistic Regression"?_lrBestIdx:_dtBestIdx]?.toFixed(2)}) — F1`,     val:s.smoteF1,    color:s.accent},
+                                {label:`No SMOTE (t=${s.noSmoteT.toFixed(2)}) — Recall`, val:s.noSmoteRecall, color:s.noSmoteColor},
+                                {label:`No SMOTE (t=${s.noSmoteT.toFixed(2)}) — F1`,     val:s.noSmoteF1,    color:s.noSmoteColor},
+                                {label:`SMOTE + Opt. (t=${sweepThresholds[s.model==="Logistic Regression"?_lrBestIdx:_dtBestIdx]?.toFixed(2)}) — Recall`, val:s.smoteRecall, color:s.smoteColor},
+                                {label:`SMOTE + Opt. (t=${sweepThresholds[s.model==="Logistic Regression"?_lrBestIdx:_dtBestIdx]?.toFixed(2)}) — F1`,     val:s.smoteF1,    color:s.smoteColor},
                               ].map(({label,val,color})=>(
                                 <div key={label} style={{background:AP.surfaceHi,borderRadius:8,padding:"10px 12px",border:`1px solid ${AP.border}`}}>
                                   <div style={{fontSize:9,color:AP.muted,marginBottom:3,letterSpacing:"0.05em",textTransform:"uppercase"}}>{label}</div>
