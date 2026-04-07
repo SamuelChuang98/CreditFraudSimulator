@@ -416,6 +416,7 @@ function Verdict({ score, T, threshold=0.5 }) {
 }
 
 function DetailDrawer({ entry, onClose, T, backendUrl, threshold=0.5 }) {
+  const windowWidth = useWindowWidth();
   const [drawerFeatures, setDrawerFeatures] = useState(null);
   const [loadingFeatures, setLoadingFeatures] = useState(false);
 
@@ -597,7 +598,7 @@ function getLogPrevTxn(clientId, logEntries) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 function useWindowWidth() {
-  const [width, setWidth] = useState(window.innerWidth);
+  const [width, setWidth] = React.useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
   useEffect(() => {
     const handler = () => setWidth(window.innerWidth);
     window.addEventListener('resize', handler);
@@ -607,7 +608,6 @@ function useWindowWidth() {
 }
 
 export default function ATMFraudSimulator() {
-  const windowWidth = useWindowWidth();
   const [model,      setModel]      = useState("logistic_regression");
   const [txn,        setTxn]        = useState(makeTransaction());
   const [result,     setResult]     = useState(null);
