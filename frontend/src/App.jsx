@@ -999,7 +999,7 @@ export default function ATMFraudSimulator() {
 
       {drawer && <DetailDrawer entry={drawer} onClose={()=>setDrawer(null)} T={THEMES[drawer.model]} backendUrl={backendUrl} threshold={modelThresholds[drawer.model] ?? 0.5}/>}
 
-      <div style={{minHeight:"100vh",background: activeTab==="analysis" ? PURPLE.bg : T.bg,padding:"32px 24px 64px",transition:"background 0.4s"}}>
+      <div className="main-wrapper" style={{minHeight:"100vh",background: activeTab==="analysis" ? PURPLE.bg : T.bg,padding:"32px 24px 64px",transition:"background 0.4s"}}>
 
         {/* Subtle top glow accent */}
         <div style={{
@@ -1085,7 +1085,7 @@ export default function ATMFraudSimulator() {
             </div>
           </div>
           {/* ── Tab Nav ── */}
-          <div style={{display:"flex",alignItems:"center",marginTop:20,borderBottom:`1px solid ${T.border}`}}>
+          <div className="tab-bar" style={{display:"flex",alignItems:"center",marginTop:20,borderBottom:`1px solid ${T.border}`}}>
             {[["simulator","⬡  Simulator"],["analysis","◎  Analysis"],["rq","⊞  Research Questions"]].map(([tab,label])=>(
               <button key={tab} onClick={()=>{ setActiveTab(tab); if((tab==="analysis"||tab==="rq")&&!analysisResults&&!analysisRunning) runAnalysis(); }} style={{
                 padding:"10px 24px",fontSize:13,fontWeight:600,cursor:"pointer",
@@ -1101,7 +1101,7 @@ export default function ATMFraudSimulator() {
 
         {activeTab === "simulator" && (<>
         {/* ── Main grid ── */}
-        <div style={{maxWidth:1060,margin:"0 auto",display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,position:"relative",zIndex:1}}>
+        <div className="sim-main-grid" style={{maxWidth:1060,margin:"0 auto",display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,position:"relative",zIndex:1}}>
 
           {/* ── Left: Transaction Editor ── */}
           <div style={{animation:"fadeUp 0.4s ease"}}>
@@ -1203,7 +1203,7 @@ export default function ATMFraudSimulator() {
             </div>
 
             {/* Stats */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
+            <div className="stats-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
               {[
                 {label:"Total Analyzed",val:log.length, color:T.text,  bg:T.surface},
                 {label:"Flagged",        val:flagged,    color:T.fraud, bg:T.surface},
@@ -1578,7 +1578,7 @@ export default function ATMFraudSimulator() {
             return (
               <div key={analysisResults.runId} style={{display:"grid",gap:16}}>
                 {/* Metrics row */}
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12}}>
+                <div className="metrics-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12}}>
                   <MetricCard label="F1 Score" lrVal={lrM.f1} dtVal={dtM.f1} fmt={v=>(v*100).toFixed(1)+"%"}/>
                   <MetricCard label="Precision" lrVal={lrM.precision} dtVal={dtM.precision} fmt={v=>(v*100).toFixed(1)+"%"}/>
                   <MetricCard label="Recall" lrVal={lrM.recall} dtVal={dtM.recall} fmt={v=>(v*100).toFixed(1)+"%"}/>
@@ -2174,7 +2174,7 @@ export default function ATMFraudSimulator() {
 
                     return (<>
                       {/* Feature cards */}
-                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                      <div className="rq2-feature-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                         {features.map(f=>(
                           <div key={f.name} style={{background:AP.tag,border:`1px solid ${f.engineered?f.color+"33":AP.tagBorder}`,borderRadius:14,padding:"18px 20px"}}>
                             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
