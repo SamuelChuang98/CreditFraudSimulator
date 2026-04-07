@@ -251,11 +251,15 @@ def reload_models(reason: str = "manual", test_size: float = 0.3):
             state.lr_error   = lr_err
             state.lr_status  = "load error" if lr_err else ("logistic_regression_analysis.py not found" if not os.path.exists(LR_FILE) else "trained successfully")
             state.lr_metrics = lr_metrics
+            if lr_err:
+                log.error(f"LR load error:\n{lr_err}")
         if dt_model is not None or os.path.exists(DT_FILE):
             state.dt_trained = dt_model
             state.dt_error   = dt_err
             state.dt_status  = "load error" if dt_err else ("decision_tree_analysis.py not found" if not os.path.exists(DT_FILE) else "trained successfully")
             state.dt_metrics = dt_metrics
+            if dt_err:
+                log.error(f"DT load error:\n{dt_err}")
 
         if X_test_lr is not None:
             state.X_test_lr      = X_test_lr
