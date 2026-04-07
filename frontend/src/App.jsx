@@ -2302,8 +2302,8 @@ export default function ATMFraudSimulator() {
                     const _lrOpt = lrSweep[_lrBestIdx] || {};
                     const _dtOpt = dtSweep[_dtBestIdx] || {};
                     const smoteRows = [
-                      {model:"Logistic Regression",  noSmoteRecall:0.10, noSmoteF1:0.1538, smoteRecall:_lrOpt.recall??0.60, smoteF1:_lrOpt.f1??0.2449, accent:THEMES.logistic_regression.accent},
-                      {model:"Decision Tree",        noSmoteRecall:0.40, noSmoteF1:0.4211, smoteRecall:_dtOpt.recall??0.40, smoteF1:_dtOpt.f1??0.2759, accent:THEMES.decision_tree.accent},
+                      {model:"Logistic Regression",  noSmoteRecall:0.10, noSmoteF1:0.1538, noSmoteT:0.50, smoteRecall:_lrOpt.recall??0.60, smoteF1:_lrOpt.f1??0.2449, accent:THEMES.logistic_regression.accent},
+                      {model:"Decision Tree",        noSmoteRecall:0.60, noSmoteF1:0.4290, noSmoteT:0.20, smoteRecall:_dtOpt.recall??0.40, smoteF1:_dtOpt.f1??0.2759, accent:THEMES.decision_tree.accent},
                     ];
 
                     // F1 line chart across thresholds
@@ -2321,13 +2321,16 @@ export default function ATMFraudSimulator() {
                       const lrBest = lrF1.indexOf(Math.max(...lrF1));
                       const dtBest = dtF1.indexOf(Math.max(...dtF1));
                       const t50Idx = sweepThresholds.findIndex(t=>Math.abs(t-0.5)<0.001);
+                      const t20Idx = sweepThresholds.findIndex(t=>Math.abs(t-0.20)<0.001);
+                      const t81Idx = sweepThresholds.findIndex(t=>Math.abs(t-0.81)<0.001);
                       const lrAcc = THEMES.logistic_regression.accent;
                       const dtAcc = THEMES.decision_tree.accent;
 
                       // No-SMOTE reference values (hardcoded from Python output)
                       const nsPoints = [
-                        {id:"lr-ns", label:"LR No SMOTE", f1:0.1538, recall:0.10, thresh:0.50, accent:lrAcc, cx:toX(t50Idx), cy:toY(0.1538)},
-                        {id:"dt-ns", label:"DT No SMOTE", f1:0.4211, recall:0.40, thresh:0.50, accent:dtAcc, cx:toX(t50Idx), cy:toY(0.4211)},
+                        {id:"lr-ns",   label:"LR No SMOTE (t=0.50)", f1:0.1538, recall:0.10, thresh:0.50, accent:lrAcc, cx:toX(t50Idx), cy:toY(0.1538)},
+                        {id:"lr-ns81", label:"LR No SMOTE (t=0.81)", f1:0.182,  recall:0.10, thresh:0.81, accent:lrAcc, cx:toX(t81Idx), cy:toY(0.182)},
+                        {id:"dt-ns",   label:"DT No SMOTE (t=0.20)", f1:0.429,  recall:0.60, thresh:0.20, accent:dtAcc, cx:toX(t20Idx), cy:toY(0.429)},
                       ];
                       const optPoints = [
                         {id:"lr-opt", label:"LR SMOTE Optimal", f1:lrF1[lrBest], recall:lrRec[lrBest], thresh:sweepThresholds[lrBest], accent:lrAcc, cx:toX(lrBest), cy:toY(lrF1[lrBest])},
@@ -2407,7 +2410,7 @@ export default function ATMFraudSimulator() {
                           <circle cx={W-padR+29} cy={padT+92} r={4} fill={lrAcc} stroke={AP.surface} strokeWidth={1.5}/>
                           <text x={W-padR+42} y={padT+95} fontSize={8} fill={AP.muted}>SMOTE Optimal</text>
                           <polygon points={`${W-padR+29},${padT+103} ${W-padR+34},${padT+107} ${W-padR+29},${padT+111} ${W-padR+24},${padT+107}`} fill={dtAcc} stroke={AP.surface} strokeWidth={1.5}/>
-                          <text x={W-padR+42} y={padT+110} fontSize={8} fill={AP.muted}>No SMOTE (t=0.50)</text>
+                          <text x={W-padR+42} y={padT+110} fontSize={8} fill={AP.muted}>No SMOTE points</text>
                           <text x={padL+cW/2} y={H-1} fontSize={8} fill={AP.muted} textAnchor="middle">Classification Threshold</text>
                           <text x={8} y={padT+cH/2} fontSize={8} fill={AP.muted} textAnchor="middle" transform={`rotate(-90,8,${padT+cH/2})`}>Score</text>
                         </svg>
@@ -2425,8 +2428,8 @@ export default function ATMFraudSimulator() {
                             </div>
                             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                               {[
-                                {label:"No SMOTE (t=0.50) — Recall", val:s.noSmoteRecall, color:AP.fraud},
-                                {label:"No SMOTE (t=0.50) — F1",     val:s.noSmoteF1,    color:AP.fraud},
+                                {label:`No SMOTE (t=${s.noSmoteT.toFixed(2)}) — Recall`, val:s.noSmoteRecall, color:AP.fraud},
+                                {label:`No SMOTE (t=${s.noSmoteT.toFixed(2)}) — F1`,     val:s.noSmoteF1,    color:AP.fraud},
                                 {label:`SMOTE + Opt. (t=${sweepThresholds[s.model==="Logistic Regression"?_lrBestIdx:_dtBestIdx]?.toFixed(2)}) — Recall`, val:s.smoteRecall, color:s.accent},
                                 {label:`SMOTE + Opt. (t=${sweepThresholds[s.model==="Logistic Regression"?_lrBestIdx:_dtBestIdx]?.toFixed(2)}) — F1`,     val:s.smoteF1,    color:s.accent},
                               ].map(({label,val,color})=>(
@@ -2470,15 +2473,17 @@ export default function ATMFraudSimulator() {
                           const lrOpt = lrSweep[lrBestIdx] || lrM50;
                           const dtOpt = dtSweep[dtBestIdx] || dtM50;
                           // No-SMOTE rows: hardcoded from Python analysis script output (backend only holds SMOTE-trained scores)
-                          const lrNoSmote = {precision:0.3333, recall:0.1000, f1:0.1538, tp:1,  fn:9};
-                          const dtNoSmote = {precision:0.4444, recall:0.4000, f1:0.4211, tp:4,  fn:6};
+                          const lrNoSmote   = {precision:0.3333, recall:0.1000, f1:0.1538, tp:1, fn:9};
+                          const lrNoSmote81 = {precision:1.0000, recall:0.1000, f1:0.1818, tp:1, fn:9};
+                          const dtNoSmote   = {precision:0.3333, recall:0.6000, f1:0.4286, tp:6, fn:4};
                           const tableRows = [
-                            {model:"LR — No SMOTE (t=0.50)",               m:lrNoSmote, accent:THEMES.logistic_regression.accent, hi:false, tag:null},
-                            {model:"LR — SMOTE, Default (t=0.50)",          m:lrM50,     accent:THEMES.logistic_regression.accent, hi:false, tag:null},
-                            {model:`LR — SMOTE + Optimal (t=${lrOptT?.toFixed(2)})`, m:lrOpt, accent:THEMES.logistic_regression.accent, hi:true,  tag:"best recall"},
-                            {model:"DT — No SMOTE (t=0.20)",               m:dtNoSmote, accent:THEMES.decision_tree.accent,       hi:true,  tag:"recommended ★"},
-                            {model:"DT — SMOTE, Default (t=0.50)",          m:dtM50,     accent:THEMES.decision_tree.accent,       hi:false, tag:null},
-                            {model:`DT — SMOTE + Optimal (t=${dtOptT?.toFixed(2)})`, m:dtOpt, accent:THEMES.decision_tree.accent,       hi:false, tag:null},
+                            {model:"LR — No SMOTE (t=0.50)",               m:lrNoSmote,   accent:THEMES.logistic_regression.accent, hi:false, tag:null},
+                            {model:"LR — No SMOTE (t=0.81)",               m:lrNoSmote81, accent:THEMES.logistic_regression.accent, hi:false, tag:"high precision"},
+                            {model:"LR — SMOTE, Default (t=0.50)",          m:lrM50,       accent:THEMES.logistic_regression.accent, hi:false, tag:null},
+                            {model:`LR — SMOTE + Optimal (t=${lrOptT?.toFixed(2)})`, m:lrOpt, accent:THEMES.logistic_regression.accent, hi:true, tag:"best recall"},
+                            {model:"DT — No SMOTE (t=0.20)",               m:dtNoSmote,   accent:THEMES.decision_tree.accent,       hi:true,  tag:"recommended ★"},
+                            {model:"DT — SMOTE, Default (t=0.50)",          m:dtM50,       accent:THEMES.decision_tree.accent,       hi:false, tag:null},
+                            {model:`DT — SMOTE + Optimal (t=${dtOptT?.toFixed(2)})`, m:dtOpt, accent:THEMES.decision_tree.accent, hi:false, tag:null},
                           ];
                           return (
                             <div>
@@ -2521,28 +2526,29 @@ export default function ATMFraudSimulator() {
                         const lrRecallGain = lrOpt.recall !== undefined ? ((lrOpt.recall - 0.10)*100).toFixed(1) : null;
                         const dtF1Shift    = dtOpt.f1 !== undefined && dtBase.f1 !== undefined ? ((dtOpt.f1 - dtBase.f1)*100).toFixed(1) : null;
                         const lrNoSmote = {precision:0.3333, recall:0.1000, f1:0.1538, tp:1, fn:9};
-                        const dtNoSmote = {precision:0.4444, recall:0.4000, f1:0.4211, tp:4, fn:6};
+                        const dtNoSmote = {precision:0.3333, recall:0.6000, f1:0.4286, tp:6, fn:4};
                         return (
                           <div style={{background:AP.surface,border:`1px solid ${AP.border}`,borderRadius:14,padding:"20px 22px"}}>
                             <div style={{fontSize:13,fontWeight:600,color:AP.text,marginBottom:10}}>Interpretation</div>
                             <div style={{fontSize:13,color:AP.muted,lineHeight:1.8}}>
-                              <strong style={{color:THEMES.decision_tree.accent}}>DT without SMOTE at t=0.50 is the strongest single configuration</strong>
-                              {" "}(F1={((dtNoSmote?.f1||0.4211)*100).toFixed(1)}%, Precision={((dtNoSmote?.precision||0.4444)*100).toFixed(1)}%, {dtNoSmote?.tp||4}/10 caught, FPR≈0.5%).
-                              SMOTE actively hurts the DT — applying it at the default threshold drops recall from 40% to{" "}
-                              <strong style={{color:AP.text}}>{(dtBase?.recall*100||0).toFixed(0)}%</strong> and F1 from 42.1% to{" "}
+                              <strong style={{color:THEMES.decision_tree.accent}}>DT without SMOTE at t=0.20 is the strongest single configuration</strong>
+                              {" "}(F1={((dtNoSmote?.f1||0.4286)*100).toFixed(1)}%, Precision={((dtNoSmote?.precision||0.3333)*100).toFixed(1)}%, {dtNoSmote?.tp||6}/10 caught).
+                              Lowering the threshold to 0.20 allows the DT to catch 6 of 10 fraud cases without requiring any oversampling.
+                              SMOTE actively hurts the DT — applying it at the default threshold drops recall from 60% to{" "}
+                              <strong style={{color:AP.text}}>{(dtBase?.recall*100||0).toFixed(0)}%</strong> and F1 from 42.9% to{" "}
                               <strong style={{color:AP.text}}>{(dtBase?.f1*100||0).toFixed(1)}%</strong>.
                               Even the DT's SMOTE + optimal threshold{" "}
                               (t={dtOptT?.toFixed(2)}, F1={((dtOpt?.f1||0)*100).toFixed(1)}%) cannot recover to the no-SMOTE baseline.
                               {" "}<strong style={{color:THEMES.logistic_regression.accent}}>LR tells the opposite story.</strong>{" "}
-                              Without SMOTE, LR catches only 1-in-10 frauds (Recall=10%, F1=15.4%) — the class imbalance overwhelms it entirely.
+                              Without SMOTE, LR catches only 1-in-10 frauds regardless of threshold — raising the threshold to 0.81 improves precision to 100% but still only catches 1 fraud.
                               SMOTE alone at t=0.50 doesn't help much either (Recall={((lrBase?.recall||0)*100).toFixed(0)}%).
                               Only combining SMOTE with threshold tuning at{" "}
                               <strong style={{color:THEMES.logistic_regression.accent}}>t={lrOptT?.toFixed(2)}</strong>{" "}
                               unlocks LR's potential: {lrOpt?.tp||7}/10 caught, Recall={((lrOpt?.recall||0)*100).toFixed(0)}%
                               {lrRecallGain && <> (+<strong style={{color:THEMES.logistic_regression.accent}}>{lrRecallGain}pp</strong> vs no SMOTE)</>}.
                               {" "}<strong style={{color:AP.text}}>The tradeoff is clear:</strong>{" "}
-                              DT offers better precision (44% vs 18%) and far fewer false alarms (FPR 0.5% vs 3.2%);
-                              LR catches nearly twice as many frauds (7 vs 4) at the cost of 6× more false positives.
+                              DT no SMOTE (t=0.20) offers the best balance of recall and F1 with minimal false alarms;
+                              LR requires SMOTE + threshold tuning to be competitive, at the cost of more false positives.
                               SMOTE is not universally beneficial — it must be validated per model.
                             </div>
                           </div>
