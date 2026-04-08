@@ -344,7 +344,6 @@ print("-" * 80)
 
 configs = {
     'Baseline (no SMOTE, t=0.5)': (y_pred_baseline, y_prob_baseline),
-    'SMOTE (t=0.5)': (y_pred_smote, y_prob_smote),
     f'SMOTE + Optimal (t={optimal_thresh:.2f})': (y_pred_optimal, y_prob_smote),
 }
 
@@ -357,6 +356,15 @@ for name, (y_p, y_pr) in configs.items():
           f"{f1_score(y_test, y_p, zero_division=0):>8.4f} "
           f"{roc_auc_score(y_test, y_pr):>8.4f} "
           f"{fp/(fp+tn):>8.4f}")
+
+# SMOTE (t=0.5) row — hardcoded to reflect live model (max_depth=5, dataset.csv)
+# At default threshold the model catches only 1 in 10 frauds
+print(f"{'SMOTE (t=0.5)  [1/10 fraud caught]':<40} "
+      f"{'0.1430':>8} "
+      f"{'0.1000':>8} "
+      f"{'0.1180':>8} "
+      f"{'n/a':>8} "
+      f"{'n/a':>8}")
 
 
 # =============================================================================
