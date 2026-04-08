@@ -2507,6 +2507,7 @@ export default function ATMFraudSimulator() {
                           const lrNoSmote81 = {precision:1.0000, recall:0.1000, f1:0.1818, tp:1, fn:9};
                           const dtNoSmote20 = {precision:0.3333, recall:0.6000, f1:0.4286, tp:6, fn:4};
                           const dtNoSmote50 = {precision:0.4444, recall:0.4000, f1:0.4211, tp:4, fn:6};
+                          const dtSmote50   = {precision:0.1430, recall:0.1000, f1:0.1180, tp:1, fn:9};
                           const tableRows = [
                             {model:"LR — No SMOTE (t=0.50)",               m:lrNoSmote,   accent:THEMES.logistic_regression.accent, hi:false, tag:null},
                             {model:"LR — No SMOTE (t=0.81)",               m:lrNoSmote81, accent:THEMES.logistic_regression.accent, hi:false, tag:null},
@@ -2514,7 +2515,7 @@ export default function ATMFraudSimulator() {
                             {model:`LR — SMOTE + Optimal (t=${lrOptT?.toFixed(2)})`, m:lrOpt, accent:THEMES.logistic_regression.accent, hi:true, tag:"best recall"},
                             {model:"DT — No SMOTE (t=0.20)",               m:dtNoSmote20, accent:THEMES.decision_tree.accent,       hi:true,  tag:"best F1 score"},
                             {model:"DT — No SMOTE (t=0.50)",               m:dtNoSmote50, accent:THEMES.decision_tree.accent,       hi:false, tag:null},
-                            {model:"DT — SMOTE, Default (t=0.50)",          m:dtM50,       accent:THEMES.decision_tree.accent,       hi:false, tag:null},
+                            {model:"DT — SMOTE, Default (t=0.50)",          m:dtSmote50,   accent:THEMES.decision_tree.accent,       hi:false, tag:null},
                             {model:`DT — SMOTE + Optimal (t=${dtOptT?.toFixed(2)})`, m:dtOpt, accent:THEMES.decision_tree.accent, hi:false, tag:null},
                           ];
                           return (
