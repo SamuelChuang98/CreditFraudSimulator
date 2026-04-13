@@ -143,7 +143,7 @@ Single monolithic React component (`ATMFraudSimulator`). All UI, state, and API 
 
 ## Dataset
 
-Synthetic Canadian credit card transaction dataset with ~550,000 rows. Fraud rate: ~0.5% (highly imbalanced). No real cardholder data is used — all transactions are synthetically generated to model realistic spending patterns.
+Synthetic Canadian credit card transaction dataset with 5,000 rows. Fraud rate: ~1% (52 fraud cases). No real cardholder data is used — all transactions are synthetically generated to model realistic spending patterns.
 
 **Features used:** transaction amount, timestamp, merchant category, city population, card category, income category, education level, marital status, age, months on book, location (lat/lng).
 
@@ -181,7 +181,7 @@ Runs at `http://localhost:5173`.
 | Frontend | React 18, Vite |
 | Backend | Python 3.11, FastAPI, Uvicorn |
 | ML | scikit-learn, imbalanced-learn (SMOTE) |
-| Dataset | Canadian credit card fraud (~550k rows) |
+| Dataset | Synthetic Canadian credit card fraud (5,000 rows) |
 | Hosting | Render (backend), Vercel (frontend) |
 | Uptime monitoring | UptimeRobot (pings `/health` every 5 min) |
 
