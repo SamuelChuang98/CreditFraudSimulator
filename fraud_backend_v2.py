@@ -75,8 +75,9 @@ state = ModelState()
 
 # ─── Spatial Velocity State ───────────────────────────────────────────────────
 
-_client_history: dict = {}   # client_id → {lat, lng, dt}
+_client_history: dict = {}   # client_id → {lat, lng, dt}  (max 500 entries)
 _history_lock = threading.Lock()
+_CLIENT_HISTORY_MAX = 500
 
 # ─── Spatial Velocity Helpers ────────────────────────────────────────────────
 
@@ -117,6 +118,10 @@ def check_spatial_velocity(f: dict) -> tuple:
                 if hours > 0:
                     speed_kmh = dist / hours
                     impossible = speed_kmh > 900
+            # Evict oldest entry if at capacity
+            if len(_client_history) >= _CLIENT_HISTORY_MAX and client_id not in _client_history:
+                oldest = next(iter(_client_history))
+                del _client_history[oldest]
             _client_history[client_id] = {'lat': lat, 'lng': lng, 'dt': txn_dt}
 
     return impossible, speed_kmh

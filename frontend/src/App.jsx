@@ -1040,20 +1040,6 @@ export default function ATMFraudSimulator() {
                 }}>
                   {backendOk === null ? "Connecting…" : backendOk ? "Backend · Python Models Active" : "Backend Offline"}
                 </span>
-                {backendOk && (
-                  <button onClick={async () => {
-                    try {
-                      const r = await fetch(`${backendUrl}/retrain`, { method:"POST" });
-                      if (r.ok) alert("✓ Models retrained successfully");
-                      else alert("✗ Retrain failed — check Terminal 2");
-                    } catch(e) { alert(`Backend unreachable: ${e.message}`); }
-                  }} style={{
-                    padding:"3px 10px", borderRadius:6, fontSize:10, fontWeight:700,
-                    border:`1px solid ${T.accent}66`, background:"transparent",
-                    color:T.accent, cursor:"pointer", fontFamily:"'DM Sans',sans-serif",
-                    letterSpacing:"0.05em", textTransform:"uppercase",
-                  }}>↺ Retrain</button>
-                )}
               </div>
             </div>
 

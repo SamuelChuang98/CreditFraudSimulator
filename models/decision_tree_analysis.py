@@ -12,16 +12,11 @@ Research Questions:
 
 import pandas as pd
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import (
     classification_report, confusion_matrix, roc_auc_score,
-    precision_recall_curve, roc_curve, f1_score, accuracy_score,
-    precision_score, recall_score
+    f1_score, accuracy_score, precision_score, recall_score
 )
 from imblearn.over_sampling import SMOTE
 import warnings
@@ -332,34 +327,95 @@ print(f"  TN={tn}  FP={fp}  FN={fn}  TP={tp}")
 
 
 # =============================================================================
+# RQ3 (Part D): THRESHOLD TUNING — NO SMOTE BASELINE
+# Sweeps thresholds on the no-SMOTE model to find its own optimal cutoff,
+# enabling a fair 4-way cross-comparison with the SMOTE model.
+# =============================================================================
+print("\n" + "=" * 70)
+print("RQ3 (Part D) — THRESHOLD TUNING: DT WITHOUT SMOTE")
+print("=" * 70)
+
+threshold_results_baseline = []
+
+for thresh in thresholds:
+    y_pred_t = (y_prob_baseline >= thresh).astype(int)
+    cm_t = confusion_matrix(y_test, y_pred_t)
+    tn_t, fp_t, fn_t, tp_t = cm_t.ravel()
+    threshold_results_baseline.append({
+        'Threshold': thresh,
+        'Precision': precision_score(y_test, y_pred_t, zero_division=0),
+        'Recall': recall_score(y_test, y_pred_t, zero_division=0),
+        'F1': f1_score(y_test, y_pred_t, zero_division=0),
+        'FPR': fp_t / (fp_t + tn_t)
+    })
+
+thresh_df_baseline = pd.DataFrame(threshold_results_baseline)
+print("\nThreshold Analysis (No SMOTE):")
+print(thresh_df_baseline.to_string(index=False, float_format='%.4f'))
+
+# Find optimal threshold for no-SMOTE by F1
+best_row_baseline = thresh_df_baseline.loc[thresh_df_baseline['F1'].idxmax()]
+optimal_thresh_baseline = best_row_baseline['Threshold']
+y_pred_optimal_baseline = (y_prob_baseline >= optimal_thresh_baseline).astype(int)
+
+print(f"\nOptimal Threshold — No SMOTE (by F1): {optimal_thresh_baseline:.2f}")
+print(f"  Precision: {best_row_baseline['Precision']:.4f}")
+print(f"  Recall:    {best_row_baseline['Recall']:.4f}")
+print(f"  F1 Score:  {best_row_baseline['F1']:.4f}")
+print(f"  FPR:       {best_row_baseline['FPR']:.4f}")
+
+print(f"\n--- DT (No SMOTE) at Optimal Threshold ({optimal_thresh_baseline:.2f}) ---")
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred_optimal_baseline, target_names=['Legit', 'Fraud'], zero_division=0))
+
+print("Confusion Matrix:")
+cm_optimal_baseline = confusion_matrix(y_test, y_pred_optimal_baseline)
+print(cm_optimal_baseline)
+tn, fp, fn, tp = cm_optimal_baseline.ravel()
+print(f"  TN={tn}  FP={fp}  FN={fn}  TP={tp}")
+
+
+# =============================================================================
 # RQ1: MODEL PERFORMANCE SUMMARY FOR CROSS-MODEL COMPARISON
+# Full 4-way comparison: SMOTE/no-SMOTE × default-t/optimal-t.
 # Captures final DT metrics for comparison against the Logistic Regression model.
 # =============================================================================
 print("\n" + "=" * 70)
 print("RQ1 — DECISION TREE FINAL SUMMARY (for LR vs DT comparison)")
 print("=" * 70)
 
-print(f"\n{'Configuration':<40} {'Prec':>8} {'Recall':>8} {'F1':>8} {'AUC':>8} {'FPR':>8}")
-print("-" * 80)
+print(f"\n{'Configuration':<45} {'Prec':>8} {'Recall':>8} {'F1':>8} {'AUC':>8} {'FPR':>8}")
+print("-" * 85)
 
 configs = {
-    'Baseline (no SMOTE, t=0.5)': (y_pred_baseline, y_prob_baseline),
+    'No SMOTE (t=0.50)': (y_pred_baseline, y_prob_baseline),
+    f'No SMOTE + Optimal (t={optimal_thresh_baseline:.2f})': (y_pred_optimal_baseline, y_prob_baseline),
+    'SMOTE (t=0.50)': (y_pred_smote, y_prob_smote),
     f'SMOTE + Optimal (t={optimal_thresh:.2f})': (y_pred_optimal, y_prob_smote),
 }
 
+best_f1 = -1
+best_config_name = ''
 for name, (y_p, y_pr) in configs.items():
     cm = confusion_matrix(y_test, y_p)
     tn, fp, fn, tp = cm.ravel()
-    print(f"{name:<40} "
+    f1_val = f1_score(y_test, y_p, zero_division=0)
+    marker = ' <-- BEST F1' if f1_val > best_f1 else ''
+    best_f1 = max(best_f1, f1_val)
+    best_config_name = name if marker else best_config_name
+    print(f"{name:<45} "
           f"{precision_score(y_test, y_p, zero_division=0):>8.4f} "
           f"{recall_score(y_test, y_p, zero_division=0):>8.4f} "
-          f"{f1_score(y_test, y_p, zero_division=0):>8.4f} "
+          f"{f1_val:>8.4f} "
           f"{roc_auc_score(y_test, y_pr):>8.4f} "
-          f"{fp/(fp+tn):>8.4f}")
+          f"{fp/(fp+tn):>8.4f}"
+          f"{marker}")
+
+print(f"\n>>> Best configuration by F1: {best_config_name}")
 
 # SMOTE (t=0.5) row — hardcoded to reflect live model (max_depth=5, dataset.csv)
 # At default threshold the model catches only 1 in 10 frauds
-print(f"{'SMOTE (t=0.5)  [1/10 fraud caught]':<40} "
+print(f"\n[Live model ref] {'SMOTE (t=0.5)  [1/10 fraud caught]':<39} "
       f"{'0.1430':>8} "
       f"{'0.1000':>8} "
       f"{'0.1180':>8} "
@@ -367,89 +423,6 @@ print(f"{'SMOTE (t=0.5)  [1/10 fraud caught]':<40} "
       f"{'n/a':>8}")
 
 
-# =============================================================================
-# VISUALIZATIONS
-# =============================================================================
-print("\n" + "=" * 70)
-print("GENERATING VISUALIZATIONS...")
-print("=" * 70)
-
-fig, axes = plt.subplots(2, 3, figsize=(18, 12))
-fig.suptitle('Decision Tree — Fraud Detection Analysis', fontsize=16, fontweight='bold')
-
-# Plot 1: Confusion Matrix — Before SMOTE
-sns.heatmap(confusion_matrix(y_test, y_pred_baseline), annot=True, fmt='d',
-            cmap='Blues', xticklabels=['Legit', 'Fraud'],
-            yticklabels=['Legit', 'Fraud'], ax=axes[0, 0])
-axes[0, 0].set_title('Confusion Matrix\n(Before SMOTE)', fontweight='bold')
-axes[0, 0].set_xlabel('Predicted')
-axes[0, 0].set_ylabel('Actual')
-
-# Plot 2: Confusion Matrix — After SMOTE
-sns.heatmap(confusion_matrix(y_test, y_pred_smote), annot=True, fmt='d',
-            cmap='Oranges', xticklabels=['Legit', 'Fraud'],
-            yticklabels=['Legit', 'Fraud'], ax=axes[0, 1])
-axes[0, 1].set_title('Confusion Matrix\n(After SMOTE)', fontweight='bold')
-axes[0, 1].set_xlabel('Predicted')
-axes[0, 1].set_ylabel('Actual')
-
-# Plot 3: Confusion Matrix — Optimal Threshold
-sns.heatmap(cm_optimal, annot=True, fmt='d',
-            cmap='Greens', xticklabels=['Legit', 'Fraud'],
-            yticklabels=['Legit', 'Fraud'], ax=axes[0, 2])
-axes[0, 2].set_title(f'Confusion Matrix\n(SMOTE + Threshold={optimal_thresh:.2f})', fontweight='bold')
-axes[0, 2].set_xlabel('Predicted')
-axes[0, 2].set_ylabel('Actual')
-
-# Plot 4: ROC Curve — Before vs After SMOTE
-fpr_b, tpr_b, _ = roc_curve(y_test, y_prob_baseline)
-fpr_s, tpr_s, _ = roc_curve(y_test, y_prob_smote)
-axes[1, 0].plot(fpr_b, tpr_b, label=f'Before SMOTE (AUC={roc_auc_score(y_test, y_prob_baseline):.3f})', linewidth=2)
-axes[1, 0].plot(fpr_s, tpr_s, label=f'After SMOTE (AUC={roc_auc_score(y_test, y_prob_smote):.3f})', linewidth=2)
-axes[1, 0].plot([0, 1], [0, 1], 'k--', alpha=0.5)
-axes[1, 0].set_title('ROC Curve\n(Before vs After SMOTE)', fontweight='bold')
-axes[1, 0].set_xlabel('False Positive Rate')
-axes[1, 0].set_ylabel('True Positive Rate')
-axes[1, 0].legend()
-
-# Plot 5: Precision-Recall Curve
-prec_b, rec_b, _ = precision_recall_curve(y_test, y_prob_baseline)
-prec_s, rec_s, _ = precision_recall_curve(y_test, y_prob_smote)
-axes[1, 1].plot(rec_b, prec_b, label='Before SMOTE', linewidth=2)
-axes[1, 1].plot(rec_s, prec_s, label='After SMOTE', linewidth=2)
-axes[1, 1].set_title('Precision-Recall Curve', fontweight='bold')
-axes[1, 1].set_xlabel('Recall')
-axes[1, 1].set_ylabel('Precision')
-axes[1, 1].legend()
-
-# Plot 6: Threshold Tuning — F1, Precision, Recall vs Threshold
-axes[1, 2].plot(thresh_df['Threshold'], thresh_df['Precision'], label='Precision', linewidth=2)
-axes[1, 2].plot(thresh_df['Threshold'], thresh_df['Recall'], label='Recall', linewidth=2)
-axes[1, 2].plot(thresh_df['Threshold'], thresh_df['F1'], label='F1', linewidth=2, linestyle='--')
-axes[1, 2].axvline(x=optimal_thresh, color='red', linestyle=':', label=f'Optimal={optimal_thresh:.2f}')
-axes[1, 2].set_title('Threshold Tuning\n(DT + SMOTE)', fontweight='bold')
-axes[1, 2].set_xlabel('Threshold')
-axes[1, 2].set_ylabel('Score')
-axes[1, 2].legend()
-
-plt.tight_layout()
-plt.savefig('dt_analysis_plots.png', dpi=150, bbox_inches='tight')
-plt.close()
-print("Saved: dt_analysis_plots.png")
-
-# --- Bonus: Decision Tree Structure Visualization ---
-fig2, ax2 = plt.subplots(figsize=(24, 12))
-plot_tree(dt_smote, feature_names=full_feature_cols, class_names=['Legit', 'Fraud'],
-          filled=True, rounded=True, max_depth=3, fontsize=8, ax=ax2)
-ax2.set_title('Decision Tree Structure (Top 3 Levels, SMOTE)', fontsize=14, fontweight='bold')
-plt.tight_layout()
-plt.savefig('dt_tree_structure.png', dpi=150, bbox_inches='tight')
-plt.close()
-print("Saved: dt_tree_structure.png")
-
-print("\n" + "=" * 70)
-print("DECISION TREE ANALYSIS COMPLETE")
-print("=" * 70)
 
 # =============================================================================
 # EXPORTS — consumed by fraud_backend_v2.py
