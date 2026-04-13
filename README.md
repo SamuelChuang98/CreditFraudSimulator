@@ -45,57 +45,49 @@ This simulator is designed to answer three research questions about machine lear
 
 ### RQ2 — Behavioral Features Most Predictive of Fraud
 
+**Behavioral Feature Means (Fraud vs. Legitimate):**
+
+| Feature | Fraud | Legitimate | Uplift |
+|---|---|---|---|
+| is_high_amt (% flagged) | 40.4% | 4.6% | 8.7× |
+| amt_per_month (avg) | 15.53 | 1.66 | 9.4× |
+| is_night (% flagged) | 40.4% | 33.1% | modest |
+
 **Logistic Regression — Top Coefficients (absolute value):**
 
-| Feature | Coefficient | Direction |
-|---|---|---|
-| amt_log | -5.92 | Higher amount → fraud |
-| is_high_amt | +3.81 | Flags large transactions |
-| is_night | +2.14 | Night-time transactions → fraud |
-| amt_per_month | +1.77 | High monthly spend → fraud |
-| new_customer | +1.43 | New accounts → higher risk |
+| Feature | Coefficient |
+|---|---|
+| amt_log | -5.92 |
+| amt (raw) | +4.71 |
+| is_high_amt | +1.18 |
+| amt_per_month | +1.15 |
 
 **Decision Tree — Feature Importance:**
 
 | Feature | Importance |
 |---|---|
 | amt (raw) | 64.0% |
-| amt_log | 12.3% |
-| is_high_amt | 8.7% |
-| merch_lat | 4.1% |
-| city_pop | 2.9% |
+| amt_log | 33.1% |
+| is_high_amt | — |
 
 **Key Findings:**
-- Transaction amount dominates both models — the DT uses raw `amt` for 64% of its splits.
-- Behavioral features derived from amount (`amt_log`, `is_high_amt`, `amt_per_month`) are strongly predictive.
-- Time-of-day (`is_night`) and customer tenure (`new_customer`) add meaningful signal in LR.
-- Base model (without behavioral features) F1: ~0.68 vs. full model F1: ~0.79 — behavioral features add ~11 points.
+- `is_high_amt` (top-5% transaction amounts) is the most discriminating engineered feature — 40.4% of fraud cases are flagged versus just 4.6% of legitimate transactions (8.7× uplift).
+- `amt_per_month` shows an even wider gap: fraud cases average 15.53 versus 1.66 for legitimate transactions (9.4×), reflecting that fraud transactions tend to be large relative to typical monthly spend.
+- `is_night` shows a directional effect (40.4% vs. 33.1%) but is not individually decisive.
+- In LR, `amt_log` carries the largest absolute weight (-5.92), and the engineered features `is_high_amt` and `amt_per_month` rank in the top seven coefficients — confirming behavioral context adds signal beyond raw amount.
+- Adding behavioral features pushed LR ROC-AUC from 0.332 to 0.933 — base features alone give LR almost nothing to work with for fraud separation.
+- In the DT, raw `amt` (64.0%) and `amt_log` (33.1%) together account for 97.1% of total feature importance.
 
 ---
 
-### RQ3 — SMOTE & Threshold Effects
-
-**SMOTE Impact (Logistic Regression):**
-
-| Condition | Precision | Recall | F1 |
-|---|---|---|---|
-| No SMOTE, t=0.50 | 0.86 | 0.63 | 0.73 |
-| SMOTE, t=0.50 | 0.79 | 0.72 | 0.75 |
-| SMOTE, t=best | 0.84 | 0.74 | **0.79** |
-
-**Threshold Sweep (Decision Tree, no SMOTE):**
-
-| Threshold | Precision | Recall | F1 |
-|---|---|---|---|
-| 0.50 | 0.87 | 0.72 | 0.79 |
-| 0.20 | 0.71 | 0.88 | 0.79 |
-| 0.80 | 0.96 | 0.61 | 0.74 |
+### RQ3 — Class Imbalance & Threshold Effects
 
 **Key Findings:**
-- Lowering the threshold increases recall (catches more fraud) at the cost of precision (more false positives).
-- SMOTE alone (at t=0.50) does not improve F1 for LR — threshold tuning is required to realize the gain.
-- For DT, SMOTE is unnecessary: threshold tuning on the no-SMOTE baseline achieves equivalent F1.
-- A threshold of ~0.20 on the DT no-SMOTE model maximizes recall (0.88) — useful when false negatives are costly.
+- SMOTE produced mixed results depending on the model — it is not a universal fix.
+- **For LR**, SMOTE at the default threshold did not improve recall (still 1/10) but increased false positives. The real gain came from combining SMOTE with threshold tuning: dropping the threshold from 0.50 to 0.09 pushed recall from 10% to 70% while precision fell from 33.3% to 17.5%. Without SMOTE, the probability distribution is too skewed for a lower threshold to help — SMOTE is a necessary precondition, not a standalone solution.
+- **For DT**, SMOTE actively degraded performance. The baseline DT (no SMOTE, t=0.50) already caught 4/10 fraud cases (F1=0.421), and a slight threshold adjustment to 0.20 improved recall to 6/10 (F1=0.429). Applying SMOTE caused recall to drop to 1/10 (F1=0.118), and even with aggressive threshold tuning to 0.05 the SMOTE-trained DT only recovered to 4/10 — suggesting the tree overfitted to synthetic samples that sit too close to existing fraud points.
+- Threshold tuning had a far greater impact on LR than DT. LR produces continuous probability outputs with high granularity; DT produces coarser leaf-node proportions with fewer distinct operating points and less sensitivity to tuning.
+- **Bottom line:** if the goal is high-precision detection, DT without SMOTE is the strongest configuration. If the priority is maximum fraud capture, LR with SMOTE + threshold tuning (t=0.09) is superior.
 
 ---
 
