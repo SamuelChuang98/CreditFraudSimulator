@@ -998,11 +998,13 @@ export default function ATMFraudSimulator() {
         ::-webkit-scrollbar-track{background:${T.bg}}
         ::-webkit-scrollbar-thumb{background:${T.border};border-radius:4px}
         input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+        .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+        .chart-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
       `}</style>
 
       {drawer && <DetailDrawer entry={drawer} onClose={()=>setDrawer(null)} T={THEMES[drawer.model]} backendUrl={backendUrl} threshold={modelThresholds[drawer.model] ?? 0.5}/>}
 
-      <div className="main-wrapper" style={{minHeight:"100vh",background: activeTab==="analysis" ? PURPLE.bg : T.bg,padding: isPhone ? "16px 12px 48px" : isTablet ? "24px 16px 56px" : "32px 24px 64px",transition:"background 0.4s"}}>
+      <div className="main-wrapper" style={{minHeight:"100vh",background: activeTab==="analysis" ? PURPLE.bg : T.bg,padding: isPhone ? "16px 12px 48px" : isTablet ? "24px 16px 56px" : "32px 24px 64px",transition:"background 0.4s",overflowX:"hidden"}}>
 
         {/* Subtle top glow accent */}
         <div style={{
