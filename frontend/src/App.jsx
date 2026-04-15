@@ -1054,9 +1054,9 @@ export default function ATMFraudSimulator() {
               border:`1px solid ${T.border}`,
             }}>
               {[
-                ["logistic_regression","Logistic Regression"],
-                ["decision_tree","Decision Tree"],
-              ].map(([val,label])=>(
+                ["logistic_regression","Logistic Regression","Log. Reg."],
+                ["decision_tree","Decision Tree","Dec. Tree"],
+              ].map(([val,label,shortLabel])=>(
                 <button key={val} onClick={()=>{ setModel(val); setResult(null); }} style={{
                   padding:"9px 20px",borderRadius:9,border:"none",
                   background: model===val
@@ -1069,7 +1069,7 @@ export default function ATMFraudSimulator() {
                   fontFamily:"'DM Sans',sans-serif",
                   borderRight: val==="logistic_regression" ? `1px solid ${T.border}` : "none",
                   borderRadius: val==="logistic_regression" ? "9px 0 0 9px" : "0 9px 9px 0",
-                }}>{label}</button>
+                }}>{isPhone ? shortLabel : label}</button>
               ))}
             </div>
           </div>
