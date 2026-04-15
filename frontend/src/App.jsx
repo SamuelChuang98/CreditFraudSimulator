@@ -1002,7 +1002,7 @@ export default function ATMFraudSimulator() {
 
       {drawer && <DetailDrawer entry={drawer} onClose={()=>setDrawer(null)} T={THEMES[drawer.model]} backendUrl={backendUrl} threshold={modelThresholds[drawer.model] ?? 0.5}/>}
 
-      <div className="main-wrapper" style={{minHeight:"100vh",background: activeTab==="analysis" ? PURPLE.bg : T.bg,padding:"32px 24px 64px",transition:"background 0.4s"}}>
+      <div className="main-wrapper" style={{minHeight:"100vh",background: activeTab==="analysis" ? PURPLE.bg : T.bg,padding: isPhone ? "16px 12px 48px" : isTablet ? "24px 16px 56px" : "32px 24px 64px",transition:"background 0.4s"}}>
 
         {/* Subtle top glow accent */}
         <div style={{
@@ -1075,15 +1075,28 @@ export default function ATMFraudSimulator() {
           </div>
           {/* ── Tab Nav ── */}
           <div className="tab-bar" style={{display:"flex",alignItems:"center",marginTop:20,borderBottom:`1px solid ${T.border}`}}>
-            {[["simulator","⬡  Simulator"],["analysis","◎  Analysis"],["rq","⊞  Research Questions"]].map(([tab,label])=>(
+            {[["simulator","⬡","Simulator"],["analysis","◎","Analysis"],["rq","⊞","Research Questions"]].map(([tab,icon,label])=>(
               <button key={tab} onClick={()=>{ setActiveTab(tab); if((tab==="analysis"||tab==="rq")&&!analysisResults&&!analysisRunning) runAnalysis(); }} style={{
-                padding:"10px 24px",fontSize:13,fontWeight:600,cursor:"pointer",
+                flex: isPhone ? 1 : undefined,
+                padding: isPhone ? "8px 4px" : "10px 24px",
+                fontSize:13,fontWeight:600,cursor:"pointer",
                 fontFamily:"'DM Sans',sans-serif",border:"none",
                 borderBottom: activeTab===tab ? `2px solid ${T.accent}` : "2px solid transparent",
                 background:"transparent",
                 color: activeTab===tab ? T.accent : T.muted,
                 letterSpacing:"0.04em",transition:"all 0.2s",marginBottom:-1,
-              }}>{label}</button>
+                display:"flex",flexDirection: isPhone ? "column" : "row",
+                alignItems:"center",gap: isPhone ? 2 : 6,
+              }}>
+                {isPhone ? (
+                  <>
+                    <span style={{fontSize:16}}>{icon}</span>
+                    <span style={{fontSize:10,letterSpacing:"0.04em"}}>{label === "Research Questions" ? "Research" : label}</span>
+                  </>
+                ) : (
+                  `${icon}  ${label}`
+                )}
+              </button>
             ))}
           </div>
         </div>
