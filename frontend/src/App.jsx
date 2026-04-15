@@ -986,7 +986,7 @@ export default function ATMFraudSimulator() {
       <style>{`
         @import url('${FONT_LINK}');
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{background:${T.bg};font-family:'DM Sans',sans-serif;color:${T.text};transition:background 0.4s;overflow-x:hidden}
+        html{overflow-x:hidden}body{background:${T.bg};font-family:'DM Sans',sans-serif;color:${T.text};transition:background 0.4s;overflow-x:hidden}
         select,input{font-family:'DM Sans',sans-serif}
         @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
         @keyframes scanBeam{0%{top:-4px;opacity:0}5%{opacity:1}95%{opacity:1}100%{top:100%;opacity:0}}
@@ -998,8 +998,8 @@ export default function ATMFraudSimulator() {
         ::-webkit-scrollbar-track{background:${T.bg}}
         ::-webkit-scrollbar-thumb{background:${T.border};border-radius:4px}
         input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
-        .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-        .chart-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+        .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%}
+        .chart-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%}
       `}</style>
 
       {drawer && <DetailDrawer entry={drawer} onClose={()=>setDrawer(null)} T={THEMES[drawer.model]} backendUrl={backendUrl} threshold={modelThresholds[drawer.model] ?? 0.5}/>}
@@ -1684,15 +1684,15 @@ export default function ATMFraudSimulator() {
                         <div style={{fontSize:11,color:AP.muted,marginBottom:8}}>
                           {filtered.length} of {analysisResults.txns.length} transactions
                         </div>
-                        <div className="table-scroll"><div style={{minWidth:650}}>
-                        <div style={{display:"grid",gridTemplateColumns:"0.5fr 1.2fr 0.8fr 0.6fr 80px 80px 70px",padding:"8px 14px",
+                        <div className="table-scroll"><div style={{minWidth:isPhone?undefined:650}}>
+                        <div style={{display:"grid",gridTemplateColumns:isPhone?"0.5fr 0.8fr 0.7fr 62px 62px 70px":"0.5fr 1.2fr 0.8fr 0.6fr 80px 80px 70px",padding:"8px 14px",
                           background:AP.tag,borderRadius:8,marginBottom:6,border:`1px solid ${AP.tagBorder}`,alignItems:"center"}}>
                           <span style={{fontSize:11,fontWeight:600,color:AP.muted,letterSpacing:"0.06em",textTransform:"uppercase"}}>#</span>
-                          <span style={{fontSize:11,fontWeight:600,color:AP.muted,letterSpacing:"0.06em",textTransform:"uppercase"}}>Business Type</span>
+                          {!isPhone && <span style={{fontSize:11,fontWeight:600,color:AP.muted,letterSpacing:"0.06em",textTransform:"uppercase"}}>Business Type</span>}
                           <SortBtn col="amt" label="Amount"/>
                           <span style={{fontSize:11,fontWeight:600,color:AP.muted,letterSpacing:"0.06em",textTransform:"uppercase"}}>Truth</span>
-                          <SortBtn col="lr" label="LR Score"/>
-                          <SortBtn col="dt" label="DT Score"/>
+                          <SortBtn col="lr" label="LR"/>
+                          <SortBtn col="dt" label="DT"/>
                           <span style={{fontSize:11,fontWeight:600,color:AP.muted,letterSpacing:"0.06em",textTransform:"uppercase"}}>Agree?</span>
                         </div>
                         <div style={{maxHeight:360,overflowY:"auto"}}>
@@ -1735,7 +1735,7 @@ export default function ATMFraudSimulator() {
                             fetchExplain(features, i, tLrScore(t), tDtScore(t));
                           }
                         }}
-                          style={{display:"grid",gridTemplateColumns:"0.5fr 1.2fr 0.8fr 0.6fr 80px 80px 70px 24px",
+                          style={{display:"grid",gridTemplateColumns:isPhone?"0.5fr 0.8fr 0.7fr 62px 62px 70px 24px":"0.5fr 1.2fr 0.8fr 0.6fr 80px 80px 70px 24px",
                           padding:"9px 14px",borderRadius:isSelected?"6px 6px 0 0":6,marginBottom:isSelected?0:2,
                           background: isSelected ? T.surfaceHi : t.label===1 ? `${AP.fraud}08` : "transparent",
                           border:`1px solid ${isSelected ? T.accent+"66" : t.label===1 ? T.fraudBdr : "transparent"}`,
@@ -1744,7 +1744,7 @@ export default function ATMFraudSimulator() {
                           onMouseEnter={e=>{if(!isSelected){e.currentTarget.style.background=T.surfaceHi;}}}
                           onMouseLeave={e=>{if(!isSelected){e.currentTarget.style.background=t.label===1?`${AP.fraud}08`:"transparent";}}}>
                           <span style={{fontSize:11,color:AP.muted}}>{i+1}</span>
-                          <span style={{fontSize:12,color:AP.text,fontWeight:500}}>{(['Big Box Retail','E-commerce','Electronics','Food & Beverage','Gas Station','Grocery','Pharmacy/Retail','Subscription','Transportation'].find(b=>t[`business_type_${b}`]===1))||'—'}</span>
+                          {!isPhone && <span style={{fontSize:12,color:AP.text,fontWeight:500}}>{(['Big Box Retail','E-commerce','Electronics','Food & Beverage','Gas Station','Grocery','Pharmacy/Retail','Subscription','Transportation'].find(b=>t[`business_type_${b}`]===1))||'—'}</span>}
                           <span style={{fontSize:12,color:AP.text}}>${Number(t.amt).toFixed(2)}</span>
                           <span style={{fontSize:11,fontWeight:700,color:t.label===1?T.fraud:AP.safe}}>
                             {t.label===1?"FRAUD":"LEGIT"}
@@ -2341,9 +2341,12 @@ export default function ATMFraudSimulator() {
                     ];
 
                     // F1 line chart across thresholds
+                    const lrAcc = THEMES.logistic_regression.accent;
+                    const dtAcc = THEMES.decision_tree.accent;
                     const ThresholdChart = () => {
                       const [hoverId, setHoverId] = useState(null);
-                      const W=620,H=230,padL=45,padB=30,padT=20,padR=175;
+                      const legendBelow = isPhone;
+                      const W=620,H=230,padL=45,padB=30,padT=20,padR=legendBelow?15:175;
                       const cW = W-padL-padR, cH = H-padB-padT;
                       const toX = i => padL + (i/(sweepThresholds.length-1))*cW;
                       const toY = v => padT + (1-v)*cH;
@@ -2357,8 +2360,6 @@ export default function ATMFraudSimulator() {
                       const t50Idx = sweepThresholds.findIndex(t=>Math.abs(t-0.5)<0.001);
                       const t20Idx = sweepThresholds.findIndex(t=>Math.abs(t-0.20)<0.001);
                       const t81Idx = sweepThresholds.findIndex(t=>Math.abs(t-0.81)<0.001);
-                      const lrAcc = THEMES.logistic_regression.accent;
-                      const dtAcc = THEMES.decision_tree.accent;
 
                       // No-SMOTE reference values (hardcoded from Python output)
                       const nsPoints = [
@@ -2427,7 +2428,8 @@ export default function ATMFraudSimulator() {
                           {/* Tooltips (rendered last so they appear on top) */}
                           {[...nsPoints,...optPoints].map(p=> hoverId===p.id
                             ? <Tooltip key={p.id} {...p}/> : null)}
-                          {/* Legend */}
+                          {/* Legend — hidden on phone (rendered as HTML below) */}
+                          {!legendBelow && (<>
                           <rect x={W-padR+10} y={padT} width={padR-16} height={130} rx={6} fill={AP.surface} stroke={AP.border}/>
                           <line x1={W-padR+20} y1={padT+14} x2={W-padR+38} y2={padT+14} stroke={lrAcc} strokeWidth={2}/>
                           <text x={W-padR+42} y={padT+17} fontSize={8} fill={AP.muted}>LR F1 (SMOTE)</text>
@@ -2445,6 +2447,7 @@ export default function ATMFraudSimulator() {
                           <text x={W-padR+42} y={padT+95} fontSize={8} fill={AP.muted}>SMOTE Optimal</text>
                           <polygon points={`${W-padR+29},${padT+103} ${W-padR+34},${padT+107} ${W-padR+29},${padT+111} ${W-padR+24},${padT+107}`} fill={dtAcc} stroke={AP.surface} strokeWidth={1.5}/>
                           <text x={W-padR+42} y={padT+110} fontSize={8} fill={AP.muted}>No SMOTE points</text>
+                          </>)}
                           <text x={padL+cW/2} y={H-1} fontSize={8} fill={AP.muted} textAnchor="middle">Classification Threshold</text>
                           <text x={8} y={padT+cH/2} fontSize={8} fill={AP.muted} textAnchor="middle" transform={`rotate(-90,8,${padT+cH/2})`}>Score</text>
                         </svg>
@@ -2489,6 +2492,30 @@ export default function ATMFraudSimulator() {
                           F1 &amp; Recall Across Thresholds — Both Models
                         </div>
                         <div className="chart-scroll"><ThresholdChart/></div>
+                        {isPhone && (
+                          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"4px 12px",marginTop:10}}>
+                            {[
+                              {color:lrAcc, dash:false,   label:"LR F1 (SMOTE)"},
+                              {color:lrAcc, dash:true,    label:"LR Recall (SMOTE)"},
+                              {color:dtAcc, dash:false,   label:"DT F1 (SMOTE)"},
+                              {color:dtAcc, dash:true,    label:"DT Recall (SMOTE)"},
+                              {color:lrAcc, dotted:true,  label:"LR F1 (No SMOTE)"},
+                              {color:dtAcc, dotted:true,  label:"DT F1 (No SMOTE)"},
+                              {color:lrAcc, circle:true,  label:"SMOTE Optimal"},
+                              {color:dtAcc, diamond:true, label:"No SMOTE points"},
+                            ].map(({color,dash,dotted,circle,diamond,label})=>(
+                              <div key={label} style={{display:"flex",alignItems:"center",gap:5}}>
+                                <svg width={18} height={10} style={{flexShrink:0}}>
+                                  {circle  && <circle cx={9} cy={5} r={3.5} fill={color}/>}
+                                  {diamond && <polygon points="9,1 13,5 9,9 5,5" fill={color}/>}
+                                  {!circle && !diamond && <line x1={1} y1={5} x2={17} y2={5} stroke={color} strokeWidth={2}
+                                    strokeDasharray={dotted?"2,3":dash?"4,2":undefined} opacity={dotted||dash?0.6:1}/>}
+                                </svg>
+                                <span style={{fontSize:10,color:AP.muted}}>{label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         <div style={{fontSize:11,color:AP.muted,marginTop:8}}>
                           Solid lines = F1-Score (SMOTE). Dashed lines = Recall (SMOTE). Faint dotted horizontals = No-SMOTE F1 baseline. Hover dots for details.
                         </div>
@@ -2522,8 +2549,9 @@ export default function ATMFraudSimulator() {
                             {model:"DT — SMOTE, Default (t=0.50)",          m:dtSmote50,   accent:THEMES.decision_tree.accent,       hi:false, tag:null},
                             {model:`DT — SMOTE + Optimal (t=${dtOptT?.toFixed(2)})`, m:dtOpt, accent:THEMES.decision_tree.accent, hi:false, tag:null},
                           ];
-                          return (
-                            <div className="table-scroll"><div style={{minWidth:500}}>
+                          return (<>
+                            {/* Desktop: 5-column table */}
+                            {!isPhone && <div className="table-scroll"><div style={{minWidth:500}}>
                               <div style={{display:"grid",gridTemplateColumns:"2.4fr 1fr 1fr 1fr 1fr",padding:"7px 12px",
                                 background:AP.surfaceHi,borderRadius:"8px 8px 0 0",border:`1px solid ${AP.border}`}}>
                                 {["Model / Configuration","Precision","Recall","F1-Score","Fraud Caught"].map(h=>(
@@ -2545,8 +2573,37 @@ export default function ATMFraudSimulator() {
                                   <span style={{fontSize:12,fontWeight:hi?700:400,color:hi?accent:AP.text}}>{m.tp} / {m.tp+m.fn}</span>
                                 </div>
                               ))}
-                            </div></div>
-                          );
+                            </div></div>}
+                            {/* Phone: stacked cards */}
+                            {isPhone && (
+                              <div style={{display:"grid",gap:8}}>
+                                {tableRows.map(({model,m,accent,hi,tag},i)=>(
+                                  <div key={i} style={{borderRadius:10,padding:"12px 14px",
+                                    background:hi?`${accent}11`:i%2===0?AP.surface:AP.tag,
+                                    border:`1px solid ${hi?accent+"44":AP.border}`}}>
+                                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8,flexWrap:"wrap"}}>
+                                      <span style={{fontSize:12,fontWeight:700,color:hi?accent:AP.text}}>{model}</span>
+                                      {tag && <span style={{fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:4,
+                                        background:`${accent}22`,color:accent,letterSpacing:"0.05em",textTransform:"uppercase"}}>{tag}</span>}
+                                    </div>
+                                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:6}}>
+                                      {[
+                                        {label:"Prec.",  val:(m.precision*100).toFixed(1)+"%"},
+                                        {label:"Recall", val:(m.recall*100).toFixed(1)+"%"},
+                                        {label:"F1",     val:(m.f1*100).toFixed(1)+"%"},
+                                        {label:"Caught", val:`${m.tp}/${m.tp+m.fn}`},
+                                      ].map(({label,val})=>(
+                                        <div key={label} style={{background:AP.surfaceHi,borderRadius:6,padding:"6px 8px",border:`1px solid ${AP.border}`}}>
+                                          <div style={{fontSize:9,color:AP.muted,marginBottom:2,textTransform:"uppercase",letterSpacing:"0.05em"}}>{label}</div>
+                                          <div style={{fontSize:13,fontWeight:700,color:hi?accent:AP.text}}>{val}</div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </>);
                         })()}
                       </div>
 
