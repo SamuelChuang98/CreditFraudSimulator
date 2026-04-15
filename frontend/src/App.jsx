@@ -1420,7 +1420,7 @@ export default function ATMFraudSimulator() {
         <div style={{maxWidth:1060,margin:"0 auto",position:"relative",zIndex:1,animation:"fadeUp 0.3s ease"}}>
 
           {/* Config + Run */}
-          <div style={{background:AP.surface,border:`1px solid ${AP.border}`,borderRadius:16,padding:28,marginBottom:20,boxShadow:`0 4px 30px rgba(0,0,0,0.3)`}}>
+          <div style={{background:AP.surface,border:`1px solid ${AP.border}`,borderRadius:16,padding:isPhone?"16px 14px":28,marginBottom:20,boxShadow:`0 4px 30px rgba(0,0,0,0.3)`}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:analysisResults?16:0,flexWrap:"wrap",gap:12}}>
               <div>
                 <div style={{fontSize:16,fontWeight:600,color:AP.text,marginBottom:4}}>Model Comparison</div>
@@ -1528,23 +1528,25 @@ export default function ATMFraudSimulator() {
               const lrN = parseFloat(lrVal), dtN = parseFloat(dtVal);
               const lrWins = higherBetter ? lrN >= dtN : lrN <= dtN;
               return (
-                <div style={{background:AP.tag,border:`1px solid ${AP.tagBorder}`,borderRadius:12,padding:"16px 18px"}}>
-                  <div style={{fontSize:11,fontWeight:600,color:AP.muted,letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:12}}>{label}</div>
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                <div style={{background:AP.tag,border:`1px solid ${AP.tagBorder}`,borderRadius:12,padding:isPhone?"12px 12px":"16px 18px"}}>
+                  <div style={{fontSize:11,fontWeight:600,color:AP.muted,letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:isPhone?8:12}}>{label}</div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:isPhone?6:8}}>
                     {[["Log. Reg.", lrN, lrWins, THEMES.logistic_regression.accent],
                       ["Dec. Tree", dtN, !lrWins, THEMES.decision_tree.accent]].map(([name,val,wins,accent])=>(
                       <div key={name} style={{
-                        padding:"10px 12px",borderRadius:8,
+                        padding:isPhone?"8px 8px":"10px 12px",borderRadius:8,
                         background: wins ? `${accent}18` : T.surfaceHi,
                         border: wins ? `1px solid ${accent}44` : `1px solid ${AP.border}`,
-                        position:"relative",
+                        position:"relative",overflow:"hidden",
                       }}>
-                        <div style={{fontSize:11,color:AP.muted,marginBottom:4}}>{name}</div>
-                        <div style={{fontSize:22,fontWeight:700,color:wins?accent:T.text,fontFamily:"'DM Serif Display',serif"}}>
+                        <div style={{fontSize:10,color:AP.muted,marginBottom:3}}>{name}</div>
+                        <div style={{fontSize:isPhone?16:22,fontWeight:700,color:wins?accent:T.text,fontFamily:"'DM Serif Display',serif"}}>
                           {fmt(val)}
                         </div>
-                        {wins && <div style={{position:"absolute",top:8,right:8,fontSize:9,fontWeight:700,
+                        {wins && !isPhone && <div style={{position:"absolute",top:8,right:8,fontSize:9,fontWeight:700,
                           padding:"2px 5px",borderRadius:3,background:accent,color:"#fff",letterSpacing:"0.05em"}}>BETTER</div>}
+                        {wins && isPhone && <div style={{fontSize:8,fontWeight:700,marginTop:2,
+                          color:accent,letterSpacing:"0.05em"}}>▲ BETTER</div>}
                       </div>
                     ))}
                   </div>
@@ -1599,7 +1601,7 @@ export default function ATMFraudSimulator() {
 
 
                 {/* Per-transaction comparison table */}
-                <div style={{background:AP.surface,border:`1px solid ${AP.border}`,borderRadius:16,padding:28,boxShadow:`0 4px 30px rgba(0,0,0,0.3)`}}>
+                <div style={{background:AP.surface,border:`1px solid ${AP.border}`,borderRadius:16,padding:isPhone?"14px 12px":28,boxShadow:`0 4px 30px rgba(0,0,0,0.3)`}}>
                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14,flexWrap:"wrap",gap:10}}>
                     <div style={{fontSize:16,fontWeight:600,color:AP.text}}>Transaction-by-Transaction Comparison</div>
                     <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
@@ -1685,7 +1687,7 @@ export default function ATMFraudSimulator() {
                           {filtered.length} of {analysisResults.txns.length} transactions
                         </div>
                         <div className="table-scroll"><div style={{minWidth:isPhone?undefined:650}}>
-                        <div style={{display:"grid",gridTemplateColumns:isPhone?"0.5fr 0.8fr 0.7fr 62px 62px 70px":"0.5fr 1.2fr 0.8fr 0.6fr 80px 80px 70px",padding:"8px 14px",
+                        <div style={{display:"grid",gridTemplateColumns:isPhone?"0.4fr 0.95fr 0.65fr 55px 55px 64px":"0.5fr 1.2fr 0.8fr 0.6fr 80px 80px 70px",padding:isPhone?"7px 10px":"8px 14px",
                           background:AP.tag,borderRadius:8,marginBottom:6,border:`1px solid ${AP.tagBorder}`,alignItems:"center"}}>
                           <span style={{fontSize:11,fontWeight:600,color:AP.muted,letterSpacing:"0.06em",textTransform:"uppercase"}}>#</span>
                           {!isPhone && <span style={{fontSize:11,fontWeight:600,color:AP.muted,letterSpacing:"0.06em",textTransform:"uppercase"}}>Business Type</span>}
@@ -1735,8 +1737,8 @@ export default function ATMFraudSimulator() {
                             fetchExplain(features, i, tLrScore(t), tDtScore(t));
                           }
                         }}
-                          style={{display:"grid",gridTemplateColumns:isPhone?"0.5fr 0.8fr 0.7fr 62px 62px 70px 24px":"0.5fr 1.2fr 0.8fr 0.6fr 80px 80px 70px 24px",
-                          padding:"9px 14px",borderRadius:isSelected?"6px 6px 0 0":6,marginBottom:isSelected?0:2,
+                          style={{display:"grid",gridTemplateColumns:isPhone?"0.4fr 0.95fr 0.65fr 55px 55px 64px 20px":"0.5fr 1.2fr 0.8fr 0.6fr 80px 80px 70px 24px",
+                          padding:isPhone?"8px 10px":"9px 14px",borderRadius:isSelected?"6px 6px 0 0":6,marginBottom:isSelected?0:2,
                           background: isSelected ? T.surfaceHi : t.label===1 ? `${AP.fraud}08` : "transparent",
                           border:`1px solid ${isSelected ? T.accent+"66" : t.label===1 ? T.fraudBdr : "transparent"}`,
                           alignItems:"center", cursor:"pointer", transition:"background 0.15s",
@@ -1852,7 +1854,7 @@ export default function ATMFraudSimulator() {
                                 ["DT Score",        `${Math.round(tDtScore(t)*100)}% → ${tDtScore(t)>=dtThreshApplied?"FRAUD":"LEGIT"}`],
                               ];
                               return (
-                                <div style={{display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"10px 24px"}}>
+                                <div style={{display:"grid", gridTemplateColumns:isPhone?"repeat(2,1fr)":"repeat(3,1fr)", gap:"10px 16px"}}>
                                   {rows.map(([label, val])=>(
                                     <div key={label} style={{display:"flex",flexDirection:"column",gap:2}}>
                                       <span style={{fontSize:10,fontWeight:600,letterSpacing:"0.08em",color:AP.muted,textTransform:"uppercase"}}>{label}</span>
