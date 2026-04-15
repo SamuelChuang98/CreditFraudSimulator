@@ -1940,10 +1940,10 @@ export default function ATMFraudSimulator() {
           const dtMetrics = analysisResults?.dtMetrics;
 
           const subTabs = [
-            {id:"rq1", label:"RQ1 — Model Comparison"},
-            {id:"rq2", label:"RQ2 — Behavioral Features"},
-            {id:"rq3", label:"RQ3 — Imbalance & Threshold"},
-            {id:"summary", label:"Summary"},
+            {id:"rq1", label:"RQ1 — Model Comparison",      shortLabel:"RQ1"},
+            {id:"rq2", label:"RQ2 — Behavioral Features",   shortLabel:"RQ2"},
+            {id:"rq3", label:"RQ3 — Imbalance & Threshold", shortLabel:"RQ3"},
+            {id:"summary", label:"Summary",                  shortLabel:"Sum."},
           ];
 
           const sectionHead = (title, sub) => (
@@ -1977,16 +1977,16 @@ export default function ATMFraudSimulator() {
 
               {/* Sub-tab nav */}
               <div style={{display:"flex",gap:4,background:AP.surface,border:`1px solid ${AP.border}`,borderRadius:12,padding:6,marginBottom:20}}>
-                {subTabs.map(({id,label})=>(
+                {subTabs.map(({id,label,shortLabel})=>(
                   <button key={id} onClick={()=>setRqTab(id)} style={{
-                    flex:1,padding:"10px 16px",borderRadius:8,border:"none",cursor:"pointer",
-                    fontFamily:"'DM Sans',sans-serif",fontSize:13,fontWeight:600,
+                    flex:1,padding: isPhone ? "8px 4px" : "10px 16px",borderRadius:8,border:"none",cursor:"pointer",
+                    fontFamily:"'DM Sans',sans-serif",fontSize: isPhone ? 11 : 13,fontWeight:600,
                     background: rqTab===id ? `linear-gradient(135deg,${AP.accentDim},${AP.accent}44)` : "transparent",
                     color: rqTab===id ? AP.accent : AP.muted,
                     transition:"all 0.2s",
                     boxShadow: rqTab===id ? `0 0 14px ${AP.accentGlow}` : "none",
                     borderBottom: rqTab===id ? `2px solid ${AP.accent}` : "2px solid transparent",
-                  }}>{label}</button>
+                  }}>{isPhone ? shortLabel : label}</button>
                 ))}
               </div>
 
