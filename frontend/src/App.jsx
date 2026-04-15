@@ -621,6 +621,9 @@ export default function ATMFraudSimulator() {
   const [drawer,     setDrawer]     = useState(null);
   const [backendOk,  setBackendOk]  = useState(null);
   const [activeTab,  setActiveTab]  = useState("simulator");
+  const vw       = useWindowWidth();
+  const isPhone  = vw <= 480;
+  const isTablet = vw <= 768;
   const lrThreshRef      = useRef(0.5);          // uncontrolled — no state update on drag
   const dtThreshRef      = useRef(0.5);
   const [lrSliderKey,    setLrSliderKey]    = useState(0); // incremented once to seed defaultValue
