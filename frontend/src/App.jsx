@@ -621,6 +621,9 @@ export default function ATMFraudSimulator() {
   const [drawer,     setDrawer]     = useState(null);
   const [backendOk,  setBackendOk]  = useState(null);
   const [activeTab,  setActiveTab]  = useState("simulator");
+  const vw       = useWindowWidth();
+  const isPhone  = vw <= 480;
+  const isTablet = vw <= 768;
   const lrThreshRef      = useRef(0.5);          // uncontrolled — no state update on drag
   const dtThreshRef      = useRef(0.5);
   const [lrSliderKey,    setLrSliderKey]    = useState(0); // incremented once to seed defaultValue
@@ -999,7 +1002,7 @@ export default function ATMFraudSimulator() {
 
       {drawer && <DetailDrawer entry={drawer} onClose={()=>setDrawer(null)} T={THEMES[drawer.model]} backendUrl={backendUrl} threshold={modelThresholds[drawer.model] ?? 0.5}/>}
 
-      <div className="main-wrapper" style={{minHeight:"100vh",background: activeTab==="analysis" ? PURPLE.bg : T.bg,padding:"32px 24px 64px",transition:"background 0.4s"}}>
+      <div className="main-wrapper" style={{minHeight:"100vh",background: activeTab==="analysis" ? PURPLE.bg : T.bg,padding: isPhone ? "16px 12px 48px" : isTablet ? "24px 16px 56px" : "32px 24px 64px",transition:"background 0.4s"}}>
 
         {/* Subtle top glow accent */}
         <div style={{
@@ -1051,9 +1054,9 @@ export default function ATMFraudSimulator() {
               border:`1px solid ${T.border}`,
             }}>
               {[
-                ["logistic_regression","Logistic Regression"],
-                ["decision_tree","Decision Tree"],
-              ].map(([val,label])=>(
+                ["logistic_regression","Logistic Regression","Log. Reg."],
+                ["decision_tree","Decision Tree","Dec. Tree"],
+              ].map(([val,label,shortLabel])=>(
                 <button key={val} onClick={()=>{ setModel(val); setResult(null); }} style={{
                   padding:"9px 20px",borderRadius:9,border:"none",
                   background: model===val
@@ -1066,21 +1069,34 @@ export default function ATMFraudSimulator() {
                   fontFamily:"'DM Sans',sans-serif",
                   borderRight: val==="logistic_regression" ? `1px solid ${T.border}` : "none",
                   borderRadius: val==="logistic_regression" ? "9px 0 0 9px" : "0 9px 9px 0",
-                }}>{label}</button>
+                }}>{isPhone ? shortLabel : label}</button>
               ))}
             </div>
           </div>
           {/* ── Tab Nav ── */}
           <div className="tab-bar" style={{display:"flex",alignItems:"center",marginTop:20,borderBottom:`1px solid ${T.border}`}}>
-            {[["simulator","⬡  Simulator"],["analysis","◎  Analysis"],["rq","⊞  Research Questions"]].map(([tab,label])=>(
+            {[["simulator","⬡","Simulator"],["analysis","◎","Analysis"],["rq","⊞","Research Questions"]].map(([tab,icon,label])=>(
               <button key={tab} onClick={()=>{ setActiveTab(tab); if((tab==="analysis"||tab==="rq")&&!analysisResults&&!analysisRunning) runAnalysis(); }} style={{
-                padding:"10px 24px",fontSize:13,fontWeight:600,cursor:"pointer",
+                flex: isPhone ? 1 : undefined,
+                padding: isPhone ? "8px 4px" : "10px 24px",
+                fontSize:13,fontWeight:600,cursor:"pointer",
                 fontFamily:"'DM Sans',sans-serif",border:"none",
                 borderBottom: activeTab===tab ? `2px solid ${T.accent}` : "2px solid transparent",
                 background:"transparent",
                 color: activeTab===tab ? T.accent : T.muted,
                 letterSpacing:"0.04em",transition:"all 0.2s",marginBottom:-1,
-              }}>{label}</button>
+                display:"flex",flexDirection: isPhone ? "column" : "row",
+                alignItems:"center",gap: isPhone ? 2 : 6,
+              }}>
+                {isPhone ? (
+                  <>
+                    <span style={{fontSize:16}}>{icon}</span>
+                    <span style={{fontSize:10,letterSpacing:"0.04em"}}>{label === "Research Questions" ? "Research" : label}</span>
+                  </>
+                ) : (
+                  `${icon}  ${label}`
+                )}
+              </button>
             ))}
           </div>
         </div>
@@ -1429,7 +1445,7 @@ export default function ATMFraudSimulator() {
               </button>
             </div>
 
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+            <div style={{display:"grid",gridTemplateColumns: isPhone ? "1fr" : "1fr 1fr",gap:16}}>
               {[
                 {label:"LR", fullLabel:"Logistic Regression", accent:THEMES.logistic_regression.accent, threshRef:lrThreshRef, sliderKey:lrSliderKey, labelRef:lrThreshLabelRef, smoteRef:lrSmoteRef, smoteBtnRef:lrSmoteBtnRef},
                 {label:"DT", fullLabel:"Decision Tree",        accent:THEMES.decision_tree.accent,       threshRef:dtThreshRef, sliderKey:dtSliderKey, labelRef:dtThreshLabelRef, smoteRef:dtSmoteRef, smoteBtnRef:dtSmoteBtnRef},
@@ -1566,7 +1582,7 @@ export default function ATMFraudSimulator() {
             return (
               <div key={analysisResults.runId} style={{display:"grid",gap:16}}>
                 {/* Metrics row */}
-                <div className="metrics-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12}}>
+                <div className="metrics-grid" style={{display:"grid",gridTemplateColumns: isTablet ? "1fr 1fr" : "1fr 1fr 1fr 1fr",gap:12}}>
                   <MetricCard label="F1 Score" lrVal={lrM.f1} dtVal={dtM.f1} fmt={v=>(v*100).toFixed(1)+"%"}/>
                   <MetricCard label="Precision" lrVal={lrM.precision} dtVal={dtM.precision} fmt={v=>(v*100).toFixed(1)+"%"}/>
                   <MetricCard label="Recall" lrVal={lrM.recall} dtVal={dtM.recall} fmt={v=>(v*100).toFixed(1)+"%"}/>
@@ -1574,7 +1590,7 @@ export default function ATMFraudSimulator() {
                 </div>
 
                 {/* Confusion matrices */}
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div style={{display:"grid",gridTemplateColumns: isPhone ? "1fr" : "1fr 1fr",gap:12}}>
                   <ConfMatrix m={lrM} label="Logistic Regression" accent={THEMES.logistic_regression.accent}/>
                   <ConfMatrix m={dtM} label="Decision Tree" accent={THEMES.decision_tree.accent}/>
                 </div>
@@ -1924,10 +1940,10 @@ export default function ATMFraudSimulator() {
           const dtMetrics = analysisResults?.dtMetrics;
 
           const subTabs = [
-            {id:"rq1", label:"RQ1 — Model Comparison"},
-            {id:"rq2", label:"RQ2 — Behavioral Features"},
-            {id:"rq3", label:"RQ3 — Imbalance & Threshold"},
-            {id:"summary", label:"Summary"},
+            {id:"rq1", label:"RQ1 — Model Comparison",      shortLabel:"RQ1"},
+            {id:"rq2", label:"RQ2 — Behavioral Features",   shortLabel:"RQ2"},
+            {id:"rq3", label:"RQ3 — Imbalance & Threshold", shortLabel:"RQ3"},
+            {id:"summary", label:"Summary",                  shortLabel:"Sum."},
           ];
 
           const sectionHead = (title, sub) => (
@@ -1961,16 +1977,16 @@ export default function ATMFraudSimulator() {
 
               {/* Sub-tab nav */}
               <div style={{display:"flex",gap:4,background:AP.surface,border:`1px solid ${AP.border}`,borderRadius:12,padding:6,marginBottom:20}}>
-                {subTabs.map(({id,label})=>(
+                {subTabs.map(({id,label,shortLabel})=>(
                   <button key={id} onClick={()=>setRqTab(id)} style={{
-                    flex:1,padding:"10px 16px",borderRadius:8,border:"none",cursor:"pointer",
-                    fontFamily:"'DM Sans',sans-serif",fontSize:13,fontWeight:600,
+                    flex:1,padding: isPhone ? "8px 4px" : "10px 16px",borderRadius:8,border:"none",cursor:"pointer",
+                    fontFamily:"'DM Sans',sans-serif",fontSize: isPhone ? 11 : 13,fontWeight:600,
                     background: rqTab===id ? `linear-gradient(135deg,${AP.accentDim},${AP.accent}44)` : "transparent",
                     color: rqTab===id ? AP.accent : AP.muted,
                     transition:"all 0.2s",
                     boxShadow: rqTab===id ? `0 0 14px ${AP.accentGlow}` : "none",
                     borderBottom: rqTab===id ? `2px solid ${AP.accent}` : "2px solid transparent",
-                  }}>{label}</button>
+                  }}>{isPhone ? shortLabel : label}</button>
                 ))}
               </div>
 
@@ -1986,7 +2002,7 @@ export default function ATMFraudSimulator() {
                   </div>
 
                   {/* Per-model threshold sliders */}
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                  <div style={{display:"grid",gridTemplateColumns:isPhone?"1fr":"1fr 1fr",gap:12}}>
                     <div style={{borderRadius:10,border:`1px solid ${THEMES.logistic_regression.accent}33`,padding:"12px 16px",background:`${THEMES.logistic_regression.accent}08`}}>
                       <div style={{fontSize:10,fontWeight:600,color:THEMES.logistic_regression.accent,letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:6}}>
                         Logistic Regression Threshold — {Math.round(rq1LrThreshold*100)}%
@@ -2014,7 +2030,7 @@ export default function ATMFraudSimulator() {
 
                     return (<>
                       {/* Metric comparison cards */}
-                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                      <div style={{display:"grid",gridTemplateColumns:isPhone?"1fr":"1fr 1fr",gap:12}}>
                         {rows.map(({name,m,accent,t})=>(
                           <div key={name} style={{background:AP.tag,border:`1px solid ${accent}44`,borderRadius:14,padding:"20px 22px"}}>
                             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
@@ -2164,7 +2180,7 @@ export default function ATMFraudSimulator() {
 
                     return (<>
                       {/* Feature cards */}
-                      <div className="rq2-feature-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                      <div className="rq2-feature-grid" style={{display:"grid",gridTemplateColumns:isPhone?"1fr":"1fr 1fr",gap:12}}>
                         {features.map(f=>(
                           <div key={f.name} style={{background:AP.tag,border:`1px solid ${f.engineered?f.color+"33":AP.tagBorder}`,borderRadius:14,padding:"18px 20px"}}>
                             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
@@ -2435,7 +2451,7 @@ export default function ATMFraudSimulator() {
 
                     return (<>
                       {/* SMOTE impact cards */}
-                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                      <div style={{display:"grid",gridTemplateColumns:isPhone?"1fr":"1fr 1fr",gap:12}}>
                         {smoteRows.map(s=>(
                           <div key={s.model} style={{background:AP.tag,border:`1px solid ${s.accent}33`,borderRadius:14,padding:"18px 20px"}}>
                             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
