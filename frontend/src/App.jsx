@@ -986,7 +986,7 @@ export default function ATMFraudSimulator() {
       <style>{`
         @import url('${FONT_LINK}');
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        body{background:${T.bg};font-family:'DM Sans',sans-serif;color:${T.text};transition:background 0.4s}
+        body{background:${T.bg};font-family:'DM Sans',sans-serif;color:${T.text};transition:background 0.4s;overflow-x:hidden}
         select,input{font-family:'DM Sans',sans-serif}
         @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
         @keyframes scanBeam{0%{top:-4px;opacity:0}5%{opacity:1}95%{opacity:1}100%{top:100%;opacity:0}}
@@ -1004,7 +1004,7 @@ export default function ATMFraudSimulator() {
 
       {drawer && <DetailDrawer entry={drawer} onClose={()=>setDrawer(null)} T={THEMES[drawer.model]} backendUrl={backendUrl} threshold={modelThresholds[drawer.model] ?? 0.5}/>}
 
-      <div className="main-wrapper" style={{minHeight:"100vh",background: activeTab==="analysis" ? PURPLE.bg : T.bg,padding: isPhone ? "16px 12px 48px" : isTablet ? "24px 16px 56px" : "32px 24px 64px",transition:"background 0.4s",overflowX:"hidden"}}>
+      <div className="main-wrapper" style={{minHeight:"100vh",background: activeTab==="analysis" ? PURPLE.bg : T.bg,padding: isPhone ? "16px 12px 48px" : isTablet ? "24px 16px 56px" : "32px 24px 64px",transition:"background 0.4s"}}>
 
         {/* Subtle top glow accent */}
         <div style={{
