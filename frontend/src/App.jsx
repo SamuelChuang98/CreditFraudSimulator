@@ -1445,7 +1445,7 @@ export default function ATMFraudSimulator() {
               </button>
             </div>
 
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+            <div style={{display:"grid",gridTemplateColumns: isPhone ? "1fr" : "1fr 1fr",gap:16}}>
               {[
                 {label:"LR", fullLabel:"Logistic Regression", accent:THEMES.logistic_regression.accent, threshRef:lrThreshRef, sliderKey:lrSliderKey, labelRef:lrThreshLabelRef, smoteRef:lrSmoteRef, smoteBtnRef:lrSmoteBtnRef},
                 {label:"DT", fullLabel:"Decision Tree",        accent:THEMES.decision_tree.accent,       threshRef:dtThreshRef, sliderKey:dtSliderKey, labelRef:dtThreshLabelRef, smoteRef:dtSmoteRef, smoteBtnRef:dtSmoteBtnRef},
@@ -1582,7 +1582,7 @@ export default function ATMFraudSimulator() {
             return (
               <div key={analysisResults.runId} style={{display:"grid",gap:16}}>
                 {/* Metrics row */}
-                <div className="metrics-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:12}}>
+                <div className="metrics-grid" style={{display:"grid",gridTemplateColumns: isTablet ? "1fr 1fr" : "1fr 1fr 1fr 1fr",gap:12}}>
                   <MetricCard label="F1 Score" lrVal={lrM.f1} dtVal={dtM.f1} fmt={v=>(v*100).toFixed(1)+"%"}/>
                   <MetricCard label="Precision" lrVal={lrM.precision} dtVal={dtM.precision} fmt={v=>(v*100).toFixed(1)+"%"}/>
                   <MetricCard label="Recall" lrVal={lrM.recall} dtVal={dtM.recall} fmt={v=>(v*100).toFixed(1)+"%"}/>
@@ -1590,7 +1590,7 @@ export default function ATMFraudSimulator() {
                 </div>
 
                 {/* Confusion matrices */}
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div style={{display:"grid",gridTemplateColumns: isPhone ? "1fr" : "1fr 1fr",gap:12}}>
                   <ConfMatrix m={lrM} label="Logistic Regression" accent={THEMES.logistic_regression.accent}/>
                   <ConfMatrix m={dtM} label="Decision Tree" accent={THEMES.decision_tree.accent}/>
                 </div>
