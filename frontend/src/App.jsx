@@ -2002,7 +2002,7 @@ export default function ATMFraudSimulator() {
                   </div>
 
                   {/* Per-model threshold sliders */}
-                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                  <div style={{display:"grid",gridTemplateColumns:isPhone?"1fr":"1fr 1fr",gap:12}}>
                     <div style={{borderRadius:10,border:`1px solid ${THEMES.logistic_regression.accent}33`,padding:"12px 16px",background:`${THEMES.logistic_regression.accent}08`}}>
                       <div style={{fontSize:10,fontWeight:600,color:THEMES.logistic_regression.accent,letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:6}}>
                         Logistic Regression Threshold — {Math.round(rq1LrThreshold*100)}%
@@ -2030,7 +2030,7 @@ export default function ATMFraudSimulator() {
 
                     return (<>
                       {/* Metric comparison cards */}
-                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                      <div style={{display:"grid",gridTemplateColumns:isPhone?"1fr":"1fr 1fr",gap:12}}>
                         {rows.map(({name,m,accent,t})=>(
                           <div key={name} style={{background:AP.tag,border:`1px solid ${accent}44`,borderRadius:14,padding:"20px 22px"}}>
                             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
@@ -2180,7 +2180,7 @@ export default function ATMFraudSimulator() {
 
                     return (<>
                       {/* Feature cards */}
-                      <div className="rq2-feature-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                      <div className="rq2-feature-grid" style={{display:"grid",gridTemplateColumns:isPhone?"1fr":"1fr 1fr",gap:12}}>
                         {features.map(f=>(
                           <div key={f.name} style={{background:AP.tag,border:`1px solid ${f.engineered?f.color+"33":AP.tagBorder}`,borderRadius:14,padding:"18px 20px"}}>
                             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
@@ -2451,7 +2451,7 @@ export default function ATMFraudSimulator() {
 
                     return (<>
                       {/* SMOTE impact cards */}
-                      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                      <div style={{display:"grid",gridTemplateColumns:isPhone?"1fr":"1fr 1fr",gap:12}}>
                         {smoteRows.map(s=>(
                           <div key={s.model} style={{background:AP.tag,border:`1px solid ${s.accent}33`,borderRadius:14,padding:"18px 20px"}}>
                             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
